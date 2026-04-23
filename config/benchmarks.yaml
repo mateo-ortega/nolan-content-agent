@@ -1,0 +1,122 @@
+# config/benchmarks.yaml — polar stars y referencias editoriales
+# Leído por: skills/nolan-decide-format, prompts de copywriter
+#
+# Cada polar star tiene: por qué la seguimos, qué tomamos, qué NO tomamos,
+# y un ejemplo de pieza que encapsula su enfoque.
+
+polar_stars:
+  bilbao_30x:
+    name: "Andrés Bilbao / 30x"
+    handle_ig: "@andres.bilbao"
+    what_we_take:
+      - "Estructura 'tesis corta + evidencia + implicación práctica'"
+      - "Autoridad desde experiencia, no desde títulos"
+      - "Cierre que empuja a acción concreta, no a like"
+    what_we_leave:
+      - "Tono empresarial / startupero"
+      - "Referencias a finanzas que no aplican a educación"
+    pair_with_niches: [adultos_ia, pymes, jovenes_preicfes]
+    format_fit: [carrusel, voiceover_broll]
+
+  platzi_freddy:
+    name: "Platzi / Freddy Vega"
+    handle_ig: "@freddyveganet"
+    what_we_take:
+      - "Análisis sobrio de tecnología sin hype"
+      - "Credibilidad técnica cuando el tema lo amerita"
+      - "Transparencia sobre limitaciones"
+    what_we_leave:
+      - "Vendedor de cursos caliente"
+      - "Promesas de outcome salarial"
+    pair_with_niches: [adultos_ia, jovenes_preicfes]
+    format_fit: [talking_head, voiceover_broll]
+
+  soy_henry:
+    name: "Soy Henry"
+    handle_ig: "@soyhenry"
+    what_we_take:
+      - "Testimoniales concretos — estudiante real cuenta su proceso"
+      - "Arcos narrativos: de frustración a logro con método"
+    what_we_leave:
+      - "Vibra bootcamp / mismo molde repetido"
+      - "Cherry picking de éxitos excepcionales"
+    pair_with_niches: [jovenes_preicfes, padres]
+    format_fit: [voiceover_broll, talking_head]
+
+  coderhouse:
+    name: "Coderhouse"
+    handle_ig: "@coderhouse"
+    what_we_take:
+      - "Ganchos interactivos — preguntas, comparativas, 'cuál es tu caso'"
+      - "Engagement-oriented cuando sirve al contenido"
+    what_we_leave:
+      - "Clickbait puro sin payoff educativo"
+    pair_with_niches: [todos]
+    format_fit: [carrusel]
+
+  freecodecamp:
+    name: "freeCodeCamp"
+    handle_ig: "@freecodecamp"
+    what_we_take:
+      - "Mínimo 30% de cada pieza es valor técnico puro y reutilizable"
+      - "Respeto por el tiempo del lector — sin relleno"
+      - "Credibilidad por consistencia, no por hype"
+    what_we_leave:
+      - "Tono demasiado seco cuando el tema permite calidez"
+    pair_with_niches: [adultos_ia, pymes, jovenes_preicfes]
+    format_fit: [carrusel, animacion]
+    hard_rule:
+      name: "30% valor técnico puro"
+      description: "Cada pieza debe incluir al menos un bloque (slide, segmento, párrafo) que enseñe algo útil aunque el lector no compre nada."
+
+  magicschool:
+    name: "MagicSchool AI"
+    handle_ig: "@magicschoolai"
+    what_we_take:
+      - "Show-don't-tell aplicado a IA + educación"
+      - "Caso de uso concreto con screenshot/resultado visible"
+      - "Demuestra el valor antes de nombrar el producto"
+    what_we_leave:
+      - "Saturación de features en un solo post"
+    pair_with_niches: [adultos_ia, pymes, cruzado_l1_l2]
+    format_fit: [carrusel, voiceover_broll, animacion]
+
+# =============================================================================
+# Cuentas de benchmark para análisis de engagement
+# =============================================================================
+# Scrapeadas por Apify cada 48-72h. Señales extraídas:
+# - hook (primera frase)
+# - formato (reel, carrusel N, story repost)
+# - tasa de engagement relativa (likes+comments / followers)
+# - caption length
+# - usa hashtags / menciona otro handle
+# Las señales van a trends.sqlite.signals_ig
+benchmark_accounts_ig:
+  - andres.bilbao
+  - 30x
+  - platzi
+  - freddyveganet
+  - soyhenry
+  - coderhouse
+  - freecodecamp
+  - magicschoolai
+  -investigar cuentas edtech que puedan funcionar con el perfil de Sapiens.
+
+# =============================================================================
+# Anti-patterns (qué NO hacer, con ejemplos abstractos)
+# =============================================================================
+anti_patterns:
+  - name: "guru_money_energy"
+    description: "Infoproducto de venta fría con promesas de transformación personal"
+    sample_red_flags:
+      - "secretos que nadie te ha contado"
+      - "cambió mi vida en X días"
+      - "emoji de llama o de dinero como gancho"
+  - name: "hater_funnel"
+    description: "Contenido de ataque a competencia como gancho de engagement"
+  - name: "ai_replacement_fear"
+    description: "Vender IA/educación usando miedo al reemplazo laboral"
+  - name: "parent_guilt"
+    description: "Culpabilizar al padre por no saber ayudar al hijo"
+  - name: "university_desperation"
+    description: "Ansiedad desmedida sobre admisión universitaria"

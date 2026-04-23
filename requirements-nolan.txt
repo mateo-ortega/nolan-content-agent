@@ -1,0 +1,20 @@
+# requirements-nolan.txt — dependencias del pipeline Python de Nolan
+#
+# Instalar en el VPS:
+#   source /srv/nolan-venv/bin/activate
+#   pip install -r requirements-nolan.txt
+#
+# Nota: Manim, Playwright y TeX Live tienen sus propias instrucciones
+# de instalación (ver scripts/bootstrap_vps.sh).
+
+# HTTP client (LLM calls + Telegram Bot API)
+httpx>=0.27.0
+
+# YAML parsing
+pyyaml>=6.0.1
+
+# Image resize (preview.jpg, placeholder slides en dry-run)
+Pillow>=10.3.0
+
+# .env loading (carga ~/.hermes/.env automáticamente)
+python-dotenv>=1.0.0

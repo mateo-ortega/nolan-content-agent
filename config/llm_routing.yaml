@@ -1,0 +1,134 @@
+# config/llm_routing.yaml — matriz tarea → modelo
+# Leído por: skills/nolan-llm-router/scripts/router.py
+#
+# Principio: research y clasificación van a DeepSeek (barato, denso);
+# copy final y reply a Telegram van a Claude Sonnet 4.6 con prompt caching;
+# web search con citaciones frescas va a Perplexity directa (fuera de OpenRouter).
+#
+# Pricing (actualizable mensual en config/budget.yaml):
+#   anthropic/claude-sonnet-4.6: ~$3/Mtok in, $15/Mtok out, cache read ~$0.30/Mtok
+#   deepseek/deepseek-chat:      ~$0.27/Mtok in, $1.10/Mtok out
+#   perplexity/sonar-pro:        ~$3/Mtok + $5/1k búsquedas
+
+defaults:
+  provider: openrouter
+  temperature: 0.4
+  top_p: 0.95
+
+tasks:
+  # ── Research ────────────────────────────────────────────────────────────
+  research.summarize_batch:
+    model: deepseek/deepseek-chat
+    max_tokens: 4000
+    temperature: 0.3
+  research.classify_niche:
+    model: deepseek/deepseek-chat
+    max_tokens: 500
+    temperature: 0.2
+  research.dedupe_cluster:
+    model: deepseek/deepseek-chat
+    max_tokens: 2000
+    temperature: 0.2
+  research.extract_structured:
+    model: deepseek/deepseek-chat
+    max_tokens: 3000
+    temperature: 0.2
+    response_format: json_object
+  research.web_search:
+    provider: perplexity
+    model: sonar-pro
+    max_tokens: 1500
+    search_recency_filter: week
+    return_citations: true
+  research.source_discovery:
+    model: deepseek/deepseek-chat
+    max_tokens: 2000
+    temperature: 0.5
+
+  # ── Strategy ────────────────────────────────────────────────────────────
+  strategy.score_topics:
+    model: deepseek/deepseek-chat
+    max_tokens: 1500
+    temperature: 0.3
+  strategy.decide_format:
+    model: deepseek/deepseek-chat
+    max_tokens: 800
+    temperature: 0.3
+  strategy.pick_archetype:
+    model: deepseek/deepseek-chat
+    max_tokens: 500
+    temperature: 0.2
+
+  # ── Copy (Claude Sonnet con prompt caching del SOUL + brand_context) ───
+  copy.final_caption:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 1200
+    temperature: 0.6
+    cache: true
+  copy.script_talking_head:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 1500
+    temperature: 0.6
+    cache: true
+  copy.voiceover_script:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 1000
+    temperature: 0.6
+    cache: true
+  copy.carrusel_yaml:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 2500
+    temperature: 0.5
+    cache: true
+  copy.alt_text:
+    model: deepseek/deepseek-chat
+    max_tokens: 400
+    temperature: 0.3
+
+  # ── Ethics gate ─────────────────────────────────────────────────────────
+  ethics.soul_check:
+    model: deepseek/deepseek-chat
+    max_tokens: 600
+    temperature: 0.1
+    response_format: json_object
+  ethics.reformulate:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 1200
+    temperature: 0.5
+    cache: true
+
+  # ── Review / Telegram replies ───────────────────────────────────────────
+  review.telegram_reply:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 600
+    temperature: 0.5
+  review.edit_piece:
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 2000
+    temperature: 0.5
+    cache: true
+
+  # ── Learning ────────────────────────────────────────────────────────────
+  learning.rule_proposal:
+    model: deepseek/deepseek-chat
+    max_tokens: 1500
+    temperature: 0.4
+  learning.rejection_pattern:
+    model: deepseek/deepseek-chat
+    max_tokens: 1000
+    temperature: 0.3
+
+# Circuit breaker global (leído por budget_guard)
+circuit_breaker:
+  consecutive_errors_threshold: 3
+  pause_minutes: 30
+  # Si OpenRouter devuelve 5xx 3x seguidas → pausa 30 min y notifica Telegram.
+
+# Fallbacks por proveedor caído
+fallbacks:
+  "anthropic/claude-sonnet-4.6":
+    - anthropic/claude-sonnet-4.5
+    - anthropic/claude-sonnet-4
+  "deepseek/deepseek-chat":
+    - deepseek/deepseek-v3
+    - openai/gpt-4o-mini

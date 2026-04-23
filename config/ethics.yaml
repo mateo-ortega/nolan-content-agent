@@ -1,0 +1,150 @@
+# config/ethics.yaml — reglas duras del semáforo
+# Leído por: ethics_gate (pre-gateway, antes de empaquetar a staging/)
+#
+# Flujo:
+#   1. Regex check sobre draft final (caption + hook + slides texto)
+#   2. Si cualquier regla RED dispara → bloqueo + notificación Telegram
+#   3. Si regla YELLOW dispara → reformula una vez con ethics.reformulate
+#   4. Si tras reformular sigue YELLOW → bloqueo
+
+# =============================================================================
+# ROJO — bloqueo inmediato, pregunta a Mateo
+# =============================================================================
+red:
+  - id: absolute_promises
+    description: "Promesas absolutas de resultado"
+    patterns:
+      - "\\b(garantiza(do|mos))\\b"
+      - "\\b(100%\\s*(garantizado|seguro|efectivo))\\b"
+      - "\\b(definitivo|definitiva)\\b"
+      - "\\b(te\\s+aseguro\\s+que)\\b"
+      - "\\b(sin\\s+falla)\\b"
+    case_insensitive: true
+
+  - id: toxic_fomo
+    description: "FOMO tóxico o miedo a reemplazo por IA"
+    patterns:
+      - "\\b(te\\s+quedas?\\s+atr[áa]s)\\b"
+      - "\\b(tu\\s+hijo\\s+va\\s+a\\s+fracasar)\\b"
+      - "\\b(la\\s+IA\\s+te\\s+va\\s+a\\s+reemplazar)\\b"
+      - "\\b(\\u00fa(ltima|ltimos)\\s+(chance|oportunidad))\\b"
+      - "\\b(no\\s+pierdas\\s+la\\s+oportunidad)\\b"
+    case_insensitive: true
+
+  - id: easy_money_hacks
+    description: "Atajos mágicos / dinero fácil / infoproductismo"
+    patterns:
+      - "\\b(truco|hack|secreto)\\s+(definitivo|m[áa]gico|infalible)\\b"
+      - "\\b(sin\\s+esfuerzo)\\b"
+      - "\\b(dinero\\s+f[áa]cil)\\b"
+      - "\\b(en\\s+\\d+\\s+d[íi]as?\\s+sin)\\b"
+      - "\\b(m[ée]todo\\s+secreto)\\b"
+    case_insensitive: true
+
+  - id: competitor_name_attack
+    description: "Desprestigio nominal de competencia"
+    # Lista de marcas vetadas (ampliable). Solo dispara si aparecen junto a
+    # lenguaje despectivo; el match simple del nombre se maneja en review humano.
+    competitor_names:
+      - "milton ochoa"
+      - "kumon"
+      - "preuniversitario"
+      - "platzi"
+      - "coderhouse"
+      - "soy henry"
+    attack_keywords:
+      - "malo"
+      - "basura"
+      - "estafa"
+      - "falso"
+      - "no sirve"
+      - "perder el tiempo"
+    mode: "cooccurrence_within_40_words"
+    case_insensitive: true
+
+  - id: politics_religion
+    description: "Política partidista o religión"
+    patterns:
+      - "\\b(petro|uribe|duque|fico|mockus)\\b"
+      - "\\b(izquierda|derecha)\\s+(política|politica)\\b"
+      - "\\b(cat[óo]lico|evang[ée]lico|protestante|musulm[áa]n)\\b.{0,40}\\b(verdad|mejor|correcto)"
+    case_insensitive: true
+
+# =============================================================================
+# AMARILLO — reformular una vez
+# =============================================================================
+yellow:
+  - id: hype_words
+    description: "Adjetivos de hype que suelen ser banderas"
+    patterns:
+      - "\\brevolucionario\\b"
+      - "\\bm[áa]gico\\b"
+      - "\\binsane\\b"
+      - "\\bbrutal\\b"
+      - "\\bcrazy\\b"
+      - "\\b(la\\s+(mejor|\\u00fanica)\\s+forma)\\b"
+    case_insensitive: true
+
+  - id: unsourced_claims
+    description: "Afirmaciones cuantitativas sin fuente"
+    # Detecta números específicos en contexto de aprendizaje sin cita.
+    # Requiere pre-proceso: si el slide/caption contiene "%" o "X veces más"
+    # y no hay cita en sources.md, dispara YELLOW.
+    patterns:
+      - "\\b(\\d+)\\s*%\\s+(más|menos|mejor)\\b"
+      - "\\b\\d+\\s+veces\\s+(más|mejor|r[áa]pido)\\b"
+    requires_sources_md: true
+    case_insensitive: true
+
+  - id: first_person_plural_corporate
+    description: "Nosotros corporativo en vez de tú directo"
+    patterns:
+      - "\\b(nosotros\\s+(creemos|pensamos|sabemos))\\b"
+      - "\\b(en\\s+sapiens\\s+creemos)\\b"
+    case_insensitive: true
+
+  - id: emoji_in_slide
+    description: "Emojis dentro de slides (permitido en captions, no en slides)"
+    # Unicode ranges para emojis comunes
+    patterns_unicode:
+      - "[\\u{1F600}-\\u{1F64F}]"  # emoticonos
+      - "[\\u{1F300}-\\u{1F5FF}]"  # símbolos
+      - "[\\u{1F680}-\\u{1F6FF}]"  # transporte/mapas
+      - "[\\u{2600}-\\u{26FF}]"    # misc símbolos
+    applies_to: ["slide_text", "carrusel_yaml"]
+
+# =============================================================================
+# VERDE — pasa silenciosamente
+# =============================================================================
+# (sin reglas explícitas; verde = no-match)
+
+# =============================================================================
+# Palabras preferidas (no bloquean, pero se loguean para calibrar SOUL)
+# =============================================================================
+preferred_vocabulary:
+  - aprender
+  - practicar
+  - entender
+  - claridad
+  - rutina
+  - método
+  - evidencia
+  - caso
+  - datos
+  - proceso
+  - práctica
+
+# =============================================================================
+# Config operacional
+# =============================================================================
+config:
+  reformulation_max_retries: 1
+  on_block_action: "notify_telegram_and_halt"
+  check_applies_to:
+    - caption.md
+    - content.yaml   # texto dentro de slides
+    - script.md       # guiones talking head y voiceover
+  exempt_from_check:
+    - metadata.json
+    - sources.md
+    - alt_text.md

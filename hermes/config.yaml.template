@@ -1,0 +1,149 @@
+# ~/.hermes/config.yaml — template para la instancia Sapiens/Nolan
+# Schema: Hermes Agent v0.10+ (Nous Research)
+# Docs: https://hermes-agent.nousresearch.com/docs/user-guide/configuration
+#
+# Deploy: copiar a ~/.hermes/config.yaml en el VPS, luego llenar secretos vía .env
+# y ejecutar `hermes` para validar.
+
+# ============================================================================
+# Modelo principal (reasoning, copy, tool use)
+# ============================================================================
+model:
+  provider: "openrouter"
+  model: "anthropic/claude-sonnet-4.6"
+  # base_url: null  # OpenRouter se maneja por provider, no custom base_url
+  # api_key se lee de OPENROUTER_API_KEY (env)
+
+# ============================================================================
+# Backend de ejecución
+# ============================================================================
+terminal:
+  backend: "local"
+  # Alternativas futuras: docker (para sandboxing de sapiens-animacion),
+  # ssh, modal, daytona, singularity
+
+# ============================================================================
+# Memoria persistente (Hermes nativa)
+# ============================================================================
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200      # ~/.hermes/memories/MEMORY.md
+  user_char_limit: 1375        # ~/.hermes/memories/USER.md
+  # Nota: memoria de dominio (trends, pieces, source_quality) NO vive aquí.
+  # Vive en ~/.hermes/skills/sapiens/nolan-research/memory/*.sqlite — gestionada
+  # por las skills, no por Hermes.
+
+# ============================================================================
+# Compresión de contexto
+# ============================================================================
+compression:
+  enabled: true
+  threshold: 0.50
+
+# ============================================================================
+# Modelos auxiliares (vision, web, compression, approvals)
+# ============================================================================
+auxiliary:
+  vision:
+    provider: "openrouter"
+    model: "anthropic/claude-sonnet-4.6"
+    # Usado si Nolan necesita analizar screenshots de benchmarks o previews
+  web_extraction:
+    provider: "openrouter"
+    model: "deepseek/deepseek-chat"
+    # extracción ligera de artículos de RSS/noticias
+  compression:
+    provider: "openrouter"
+    model: "deepseek/deepseek-chat"
+  approval:
+    provider: "openrouter"
+    model: "deepseek/deepseek-chat"
+
+# ============================================================================
+# Comportamiento del agente (reasoning, tool enforcement, max turns)
+# ============================================================================
+agent:
+  reasoning_effort: "medium"   # low | medium | high — medium es el balance $/calidad
+  max_turns: 30                # por ciclo de research; piezas completas pueden requerir más
+  tool_enforcement: "soft"     # permite al modelo devolver texto si no hay tool que aplique
+
+# ============================================================================
+# Display (runtime local para Mateo en el VPS o en dev)
+# ============================================================================
+display:
+  streaming: true
+  verbosity: "normal"
+  skin: "default"
+
+# ============================================================================
+# Streaming para gateways (Telegram)
+# ============================================================================
+streaming:
+  enabled: true
+  # Mensajes progresivos en Telegram mientras se producen piezas
+
+# ============================================================================
+# Seguridad
+# ============================================================================
+security:
+  secret_redaction: true
+  tirith_scanning: true        # escaneo de comandos peligrosos antes de ejecutar
+  blocklist:
+    - "rm -rf /"
+    - "rm -rf ~"
+    - "sudo rm"
+    - "mkfs"
+    - "dd if="
+
+# ============================================================================
+# Aprobaciones
+# ============================================================================
+approvals:
+  dangerous_commands: "ask"    # ask | auto | deny
+  # Comandos que tocan systemd, cron, firewall, red → siempre ask a Mateo
+
+# ============================================================================
+# Skills
+# ============================================================================
+skills:
+  # Namespace Sapiens. Hermes carga todas las skills bajo ~/.hermes/skills/sapiens/*
+  sapiens:
+    enabled: true
+    categories:
+      - nolan-research
+      - nolan-decide-format
+      - nolan-produce-carrusel
+      - nolan-produce-animacion
+      - nolan-produce-voiceover
+      - nolan-package
+      - nolan-llm-router
+    # Skills de producción legacy (portadas desde ~/.claude/skills/):
+    legacy:
+      - sapiens-carrusel
+      - sapiens-animacion
+  # Auto-learning: Hermes lo hace nativo, sin gate. Nuestro cron
+  # (scripts/skill_review_cron.sh) detecta nuevas skills y las pone en review.
+
+# ============================================================================
+# Delegación (subagentes con modelos distintos)
+# ============================================================================
+delegation:
+  # Subagentes para tareas específicas que Nolan lanza en paralelo.
+  # Ej: research paralelo a 4 fuentes, cada una con DeepSeek.
+  research_subagent:
+    provider: "openrouter"
+    model: "deepseek/deepseek-chat"
+  copy_subagent:
+    provider: "openrouter"
+    model: "anthropic/claude-sonnet-4.6"
+
+# ============================================================================
+# TTS / STT — desactivados en v1 (no hay voice mode)
+# ============================================================================
+tts:
+  enabled: false
+stt:
+  enabled: false
+voice:
+  enabled: false

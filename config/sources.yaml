@@ -1,0 +1,133 @@
+# config/sources.yaml — fuentes de investigación
+# Leído por: skills/nolan-research/scripts/*.py
+#
+# Flujo: cada fuente produce señales → dedupe por hash_norm → trends.sqlite.
+# Nuevas fuentes descubiertas por research.source_discovery quedan en
+# candidate_sources.sqlite hasta que Mateo las apruebe con /aprobar-fuente.
+
+# =============================================================================
+# Apify — scraping IG/TikTok (pagos, ver budget)
+# =============================================================================
+apify:
+  instagram_profile_scraper:
+    actor_id: "apify/instagram-profile-scraper"
+    cadence_hours: 48
+    max_posts_per_run: 20
+    benchmark_handles:
+      # Polar stars + benchmarks del nicho educativo CO
+      - "andres.bilbao"        # Rappi founder — autoridad
+      - "30x"                   # 30x brand — autoridad
+      - "platzi"                # edtech referente
+      - "freddyveganet"         # Freddy Vega — fundador Platzi
+      - "soyhenry"              # Soy Henry — bootcamp
+      - "coderhouse"            # Coderhouse — bootcamp
+      - "freecodecamp"          # freeCodeCamp — valor técnico
+      - "magicschoolai"         # MagicSchool AI — show-don't-tell IA+edu
+      # TBD — cuentas edtech CO para padres/preicfes (Mateo confirma fase 0)
+      # - "preicfes.oficial"
+      # - "rutasaber"
+      # - "academico.co"
+
+  tiktok_profile_scraper:
+    actor_id: "clockworks/tiktok-profile-scraper"
+    cadence_hours: 72
+    max_videos_per_run: 15
+    benchmark_handles:
+      - "platzi"
+      - "30xbrand"
+      - "magicschoolai"
+      # TBD
+
+  # Presupuesto Apify (tracked separado)
+  budget_usd_per_month_cap: 10
+
+# =============================================================================
+# RSS — fuentes oficiales (gratis)
+# =============================================================================
+rss:
+  cadence_hours: 4
+  feeds:
+    # Oficial educación Colombia
+    - name: "MinEducación CO"
+      url: "https://www.mineducacion.gov.co/portal/rss/"
+      tags: [oficial, politicas, educacion]
+    - name: "ICFES noticias"
+      url: "https://www.icfes.gov.co/rss/"
+      tags: [oficial, icfes, evaluacion]
+    # Oficial IA global
+    - name: "Anthropic News"
+      url: "https://www.anthropic.com/news/rss"
+      tags: [ia, anthropic]
+    - name: "OpenAI Blog"
+      url: "https://openai.com/blog/rss.xml"
+      tags: [ia, openai]
+    - name: "Google AI Blog"
+      url: "https://blog.google/technology/ai/rss/"
+      tags: [ia, google]
+    - name: "arxiv cs.CL"
+      url: "https://export.arxiv.org/rss/cs.CL"
+      tags: [ia, investigacion, papers]
+    # Edu + tech CO
+    - name: "El Tiempo Educación"
+      url: "https://www.eltiempo.com/rss/vida_educacion.xml"
+      tags: [prensa, educacion, colombia]
+    - name: "Semana Educación"
+      url: "https://www.semana.com/rss/educacion/"
+      tags: [prensa, educacion, colombia]
+    # TBD — Mateo puede sumar feeds específicos
+
+# =============================================================================
+# Perplexity — news IA + educación CO (directa, no OpenRouter)
+# =============================================================================
+perplexity:
+  cadence_daily_queries: 5
+  max_queries_per_cycle: 5
+  recency_filter: week
+  queries:
+    - "últimas noticias IA educación Colombia"
+    - "ICFES Saber 11 noticias Colombia"
+    - "tendencias educación privada Colombia 2026"
+    - "herramientas IA para estudiantes en español"
+    - "hábitos de estudio investigación reciente"
+
+# =============================================================================
+# Google Trends Colombia (gratis vía pytrends)
+# =============================================================================
+google_trends:
+  geo: "CO"
+  cadence_hours: 24
+  tracked_keywords:
+    - "ICFES"
+    - "Saber 11"
+    - "mejores colegios Colombia"
+    - "preicfes"
+    - "cómo estudiar"
+    - "lectura crítica"
+    - "ChatGPT para estudiar"
+    - "tareas con IA"
+  related_queries: true
+  rising_queries_alert_threshold: 5000  # % de aumento para destacar
+
+# =============================================================================
+# Source discovery (cron semanal — DeepSeek propone fuentes nuevas)
+# =============================================================================
+discovery:
+  cadence_cron: "0 4 * * 1"   # Lunes 4 AM
+  prompt_template: prompts/system/source_validator.md
+  max_candidates_per_run: 10
+  storage: memory/candidate_sources.sqlite
+  # Flujo: DeepSeek propone → Mateo revisa por Telegram → aprobadas se agregan
+  # a sources.yaml (commit manual o por /aprobar-fuente).
+
+# =============================================================================
+# Dedupe
+# =============================================================================
+dedupe:
+  algorithm: "sha256(normalize(title) + canonical_url)"
+  normalize:
+    lowercase: true
+    strip_accents: false
+    strip_emojis: true
+    strip_punctuation: true
+    collapse_whitespace: true
+  similarity_threshold: 0.85   # para clustering posterior con DeepSeek

@@ -1,0 +1,74 @@
+# === Secrets ===
+.env
+.env.local
+hermes/.env
+*.pem
+*.key
+credentials.json
+service-account*.json
+
+# === Runtime / output ===
+staging/
+drive-mount/
+logs/
+*.log
+*.jsonl
+
+# === Memoria local (no versionar domain data) ===
+memory/*.sqlite
+memory/*.sqlite-journal
+memory/*.sqlite-wal
+memory/*.sqlite-shm
+memory/vectorstore/
+memory/skills-snapshot.json
+hermes-memory/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+pip-wheel-metadata/
+
+# === Skills legacy portadas (grandes, se clonan en fase 2) ===
+skills/sapiens-carrusel/
+skills/sapiens-animacion/
+!skills/sapiens-carrusel/.gitkeep
+!skills/sapiens-animacion/.gitkeep
+
+# === Manim / LaTeX output ===
+media/
+*.aux
+*.log
+*.synctex.gz
+
+# === Playwright ===
+.playwright/
+playwright-report/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Editores ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Hermes runtime (cada VPS lo regenera) ===
+.hermes/
+~/.hermes/
