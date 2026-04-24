@@ -158,6 +158,17 @@ REGLAS CRÍTICAS — cualquier violación invalida el YAML:
 8. Gestos permitidos para `interior`: tachadura, escala, repeticion, inversion, fragmentacion. NO USES el gesto bloque.
 9. El campo `eyebrow` (la ETIQUETA numerada superior) para portada y cta va en la raíz de su objeto, pero para interiores debe ir siempre DENTRO del objeto `g`.
 10. Devuelve SOLO el YAML, sin bloques markdown ni explicaciones.
+11. **LÍMITES DE CARACTERES POR GESTO** — el render desbordará silenciosamente si excedes estos topes. Los caracteres incluyen espacios pero NO los tags `<br>`:
+    - `escala` (tipografía 210px): palabra individual máx 8 chars · `pre`+`accent`+`post` totales ≤ 35 chars · usa al menos un `<br>` para partir.
+    - `fragmentacion` (tipografía 180-220px): cada `text` máx 8 chars · `left` ≤ '55%' · `top` ≤ '65%' · `size` ≤ '200px'.
+    - `tachadura` (tipografía 120px): cada palabra máx 12 chars · `pre`+`strike`+`mid`+`emphasis`+`post` totales ≤ 60 chars.
+    - `inversion` (tipografía 120px): cada palabra máx 12 chars · `pre`+`flipped`+`post` totales ≤ 50 chars · `flipped` máx 8 chars (rota 180°).
+    - `repeticion` (tipografía 120px): cada `word` máx 14 chars · 3 palabras (la 4ta queda fuera de canvas).
+    - `portada.hero`: `hero_pre`+`hero_accent`+`hero_post` totales ≤ 60 chars · cada palabra máx 14 chars · usa `<br>` cada 2-3 palabras.
+    - `cta.hero`: máx 12 chars (idealmente solo "sapiens").
+    - `body` (cualquier slide): máx 140 chars con `<br>` cada ~50.
+    Si un concepto requiere más caracteres → reformula más corto, parte con `<br>`, o cambia de gesto.
+12. **PROHIBIDO palabras compuestas largas sin partir.** "herramientas" (12 chars) cabe en gestos 120px pero NO en 210px (escala/fragmentacion). Para conceptos largos, usa el gesto adecuado o reformula a sinónimo más corto ("apps", "métodos", "claves").
 
 SCHEMA DEL RENDERER (cópialo exactamente en su estructura y llaves):
 
