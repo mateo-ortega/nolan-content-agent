@@ -107,7 +107,7 @@ def main():
     raw: list[dict] = []
     raw.extend(_collect_rss(cfg))
     raw.extend(_collect_google_trends(cfg))
-    raw.extend(_collect_perplexity(cfg))   # no-op si falta PERPLEXITY_API_KEY
+    raw.extend(_collect_web_search(cfg))   # Tavily > Perplexity > DuckDuckGo
     raw.extend(_collect_apify(cfg))        # stub si falta APIFY_TOKEN
 
     _log(f"[research] senales crudas={len(raw)}")
@@ -237,22 +237,79 @@ def _collect_google_trends(cfg: dict) -> list[dict]:
     return signals
 
 
-def _collect_perplexity(cfg: dict) -> list[dict]:
-    api_key = os.environ.get("PERPLEXITY_API_KEY", "")
-    if not api_key:
-        _log("[research] WARN: sin PERPLEXITY_API_KEY, saltando noticias Perplexity")
-        return []
-
+def _collect_web_search(cfg: dict) -> list[dict]:
+    """
+    Busqueda web para noticias recientes. Prioridad:
+      1. Tavily (TAVILY_API_KEY) — diseñado para agentes LLM, devuelve contenido + URLs
+      2. Perplexity (PERPLEXITY_API_KEY) — si disponible, alta calidad con citaciones
+      3. DuckDuckGo — siempre disponible, sin clave, como fallback
+    """
     queries = cfg.get("perplexity", {}).get("queries", [])
     max_q   = cfg.get("perplexity", {}).get("max_queries_per_cycle", 5)
-    signals = []
 
-    for query in queries[:max_q]:
+    tavily_key = os.environ.get("TAVILY_API_KEY", "")
+    perp_key   = os.environ.get("PERPLEXITY_API_KEY", "")
+
+    if tavily_key:
+        signals = _search_tavily(queries[:max_q], tavily_key)
+        _log(f"[research] Tavily: {len(signals)} resultados")
+        return signals
+
+    if perp_key:
+        signals = _search_perplexity(queries[:max_q], perp_key)
+        _log(f"[research] Perplexity: {len(signals)} citas")
+        return signals
+
+    # Fallback gratuito: DuckDuckGo
+    signals = _search_duckduckgo(queries[:max_q])
+    _log(f"[research] DuckDuckGo (fallback): {len(signals)} resultados")
+    return signals
+
+
+def _search_tavily(queries: list[str], api_key: str) -> list[dict]:
+    signals = []
+    for query in queries:
+        try:
+            resp = httpx.post(
+                "https://api.tavily.com/search",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "api_key":        api_key,
+                    "query":          query,
+                    "search_depth":   "basic",
+                    "topic":          "news",
+                    "days":           7,
+                    "max_results":    5,
+                    "include_answer": False,
+                },
+                timeout=20,
+            )
+            resp.raise_for_status()
+            for r in resp.json().get("results", []):
+                signals.append({
+                    "source_type": "news",
+                    "source":      "tavily",
+                    "query":       query,
+                    "title":       r.get("title", query),
+                    "url":         r.get("url", ""),
+                    "summary":     (r.get("content") or r.get("snippet") or "")[:300],
+                    "published":   r.get("published_date", datetime.now(tz=timezone.utc).isoformat()),
+                    "low_conf":    0,
+                    "tags":        json.dumps(["tavily", "news"]),
+                })
+            time.sleep(0.5)
+        except Exception as e:
+            _log(f"[research] WARN Tavily '{query}': {e}")
+    return signals
+
+
+def _search_perplexity(queries: list[str], api_key: str) -> list[dict]:
+    signals = []
+    for query in queries:
         try:
             resp = httpx.post(
                 "https://api.perplexity.ai/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}",
-                         "Content-Type": "application/json"},
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json={
                     "model": "sonar",
                     "messages": [{"role": "user", "content": query}],
@@ -263,11 +320,10 @@ def _collect_perplexity(cfg: dict) -> list[dict]:
                 timeout=30,
             )
             resp.raise_for_status()
-            data = resp.json()
-            citations = data.get("citations", [])
-            low_conf  = 1 if not citations else 0
-            content   = data["choices"][0]["message"]["content"]
-            for cit in citations[:4]:
+            data    = resp.json()
+            cits    = data.get("citations", [])
+            content = data["choices"][0]["message"]["content"]
+            for cit in cits[:4]:
                 signals.append({
                     "source_type": "news",
                     "source":      "perplexity",
@@ -276,14 +332,42 @@ def _collect_perplexity(cfg: dict) -> list[dict]:
                     "url":         cit if isinstance(cit, str) else cit.get("url", ""),
                     "summary":     content[:300],
                     "published":   datetime.now(tz=timezone.utc).isoformat(),
-                    "low_conf":    low_conf,
+                    "low_conf":    0 if cits else 1,
                     "tags":        json.dumps(["perplexity", "news"]),
                 })
             time.sleep(1)
         except Exception as e:
             _log(f"[research] WARN Perplexity '{query}': {e}")
+    return signals
 
-    _log(f"[research] Perplexity: {len(signals)} citas")
+
+def _search_duckduckgo(queries: list[str]) -> list[dict]:
+    try:
+        from duckduckgo_search import DDGS  # type: ignore
+    except ImportError:
+        _log("[research] WARN: duckduckgo-search no instalado")
+        return []
+
+    signals = []
+    with DDGS() as ddgs:
+        for query in queries:
+            try:
+                results = list(ddgs.news(query, max_results=5, timelimit="w"))
+                for r in results:
+                    signals.append({
+                        "source_type": "news",
+                        "source":      "duckduckgo",
+                        "query":       query,
+                        "title":       r.get("title", query),
+                        "url":         r.get("url", ""),
+                        "summary":     r.get("body", "")[:300],
+                        "published":   r.get("date", datetime.now(tz=timezone.utc).isoformat()),
+                        "low_conf":    0,
+                        "tags":        json.dumps(["duckduckgo", "news"]),
+                    })
+                time.sleep(1)
+            except Exception as e:
+                _log(f"[research] WARN DuckDuckGo '{query}': {e}")
     return signals
 
 
