@@ -1,14 +1,23 @@
 # config/llm_routing.yaml — matriz tarea → modelo
-# Leído por: skills/nolan-llm-router/scripts/router.py
+# Leído por: sapiens/nolan_llm_router.py
 #
-# Principio: research y clasificación van a DeepSeek (barato, denso);
-# copy final y reply a Telegram van a Claude Sonnet 4.6 con prompt caching;
-# web search con citaciones frescas va a Perplexity directa (fuera de OpenRouter).
+# Arquitectura de proveedores (prioridad):
+#   1. NVIDIA NIM (primary para DeepSeek) — gratis, 40 RPM, ~1000 req/mes free
+#   2. OpenRouter (primary para Claude; fallback de NIM) — pagado
+#   3. Perplexity (solo research.web_search con citaciones)
 #
-# Pricing (actualizable mensual en config/budget.yaml):
-#   anthropic/claude-sonnet-4.6: ~$3/Mtok in, $15/Mtok out, cache read ~$0.30/Mtok
-#   deepseek/deepseek-chat:      ~$0.27/Mtok in, $1.10/Mtok out
-#   perplexity/sonar-pro:        ~$3/Mtok + $5/1k búsquedas
+# Principio: DeepSeek V4 Flash corre en NIM (gratis). Claude corre en OpenRouter
+# (pagado, necesario para calidad de copy). Si NIM falla → OpenRouter. Si OR
+# falla para copy → Anthropic direct (vía fallback en model_fallbacks).
+#
+# Model IDs por proveedor (mismo modelo, distinto namespace):
+#   NVIDIA NIM:   deepseek-ai/deepseek-v4-flash
+#   OpenRouter:   deepseek/deepseek-v4-flash
+#
+# Pricing estimado (mensual con 30 ciclos/mes):
+#   DeepSeek en NIM:              $0.00  (free tier — ahorra ~$0.15-0.30/mes vs OR)
+#   Claude Sonnet en OpenRouter:  ~$0.10-0.30  (copy + review, con caching)
+#   Perplexity sonar:             ~$0.05  (5 queries/ciclo × 30 ciclos)
 
 defaults:
   provider: openrouter
@@ -16,21 +25,25 @@ defaults:
   top_p: 0.95
 
 tasks:
-  # ── Research ────────────────────────────────────────────────────────────
+  # ── Research (NIM primary → OR fallback) ────────────────────────────────
   research.summarize_batch:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 4000
     temperature: 0.3
   research.classify_niche:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 500
     temperature: 0.2
   research.dedupe_cluster:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 2000
     temperature: 0.2
   research.extract_structured:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 3000
     temperature: 0.2
     response_format: json_object
@@ -41,94 +54,157 @@ tasks:
     search_recency_filter: week
     return_citations: true
   research.source_discovery:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 2000
     temperature: 0.5
 
-  # ── Strategy ────────────────────────────────────────────────────────────
+  # ── Strategy (NIM primary → OR fallback) ────────────────────────────────
   strategy.score_topics:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 1500
     temperature: 0.3
   strategy.decide_format:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 800
     temperature: 0.3
   strategy.pick_archetype:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 500
     temperature: 0.2
 
-  # ── Copy (Claude Sonnet con prompt caching del SOUL + brand_context) ───
+  # ── Copy (OpenRouter → Anthropic direct fallback) ────────────────────────
+  # Claude via OpenRouter con prompt caching del SOUL + brand_context.
+  # No caen a NIM — calidad de copy no es negociable.
   copy.final_caption:
+    provider: openrouter
     model: anthropic/claude-sonnet-4.6
     max_tokens: 1200
     temperature: 0.6
     cache: true
   copy.script_talking_head:
+    provider: openrouter
     model: anthropic/claude-sonnet-4.6
     max_tokens: 1500
     temperature: 0.6
     cache: true
   copy.voiceover_script:
+    provider: openrouter
     model: anthropic/claude-sonnet-4.6
     max_tokens: 1000
     temperature: 0.6
     cache: true
   copy.carrusel_yaml:
+    provider: openrouter
     model: anthropic/claude-sonnet-4.6
     max_tokens: 2500
     temperature: 0.5
     cache: true
+  copy.carrusel_ds_html:
+    provider: openrouter
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 16000   # 6-7 HTMLs completos ~8-12K tokens
+    temperature: 0.5
+    cache: true
+  copy.guion_teleprompter:
+    provider: openrouter
+    model: anthropic/claude-sonnet-4.6
+    max_tokens: 2000
+    temperature: 0.6
+    cache: true
   copy.alt_text:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 400
     temperature: 0.3
 
-  # ── Ethics gate ─────────────────────────────────────────────────────────
+  # ── Animación (NIM primary) ──────────────────────────────────────────────
+  animacion.params:
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
+    max_tokens: 1500
+    temperature: 0.30
+    response_format: json_object
+
+  # ── Ethics gate ──────────────────────────────────────────────────────────
   ethics.soul_check:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 600
     temperature: 0.1
     response_format: json_object
   ethics.reformulate:
+    provider: openrouter
     model: anthropic/claude-sonnet-4.6
     max_tokens: 1200
     temperature: 0.5
     cache: true
 
-  # ── Review / Telegram replies ───────────────────────────────────────────
+  # ── Review / Telegram replies ────────────────────────────────────────────
   review.telegram_reply:
-    model: anthropic/claude-sonnet-4.6
+    provider: openrouter
+    model: anthropic/claude-haiku-4-5
     max_tokens: 600
-    temperature: 0.5
+    temperature: 0.4
   review.edit_piece:
+    provider: openrouter
     model: anthropic/claude-sonnet-4.6
     max_tokens: 2000
     temperature: 0.5
     cache: true
 
-  # ── Learning ────────────────────────────────────────────────────────────
+  # ── Learning (NIM primary) ───────────────────────────────────────────────
   learning.rule_proposal:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 1500
     temperature: 0.4
   learning.rejection_pattern:
-    model: deepseek/deepseek-chat
+    provider: nvidia_nim
+    model: deepseek-ai/deepseek-v4-flash
     max_tokens: 1000
     temperature: 0.3
 
-# Circuit breaker global (leído por budget_guard)
+# =============================================================================
+# Circuit breaker
+# =============================================================================
 circuit_breaker:
   consecutive_errors_threshold: 3
   pause_minutes: 30
-  # Si OpenRouter devuelve 5xx 3x seguidas → pausa 30 min y notifica Telegram.
 
-# Fallbacks por proveedor caído
-fallbacks:
+# =============================================================================
+# Fallbacks de proveedor
+# =============================================================================
+
+# Cuando NVIDIA NIM falla (3 reintentos) → cae a OpenRouter con mismo modelo.
+# Solo aplica a tareas que usan NIM como primary.
+# Nombre de la clave: debe matchear `f"{failed_provider}_fallback"` del router,
+# donde failed_provider == "nvidia_nim".
+nvidia_nim_fallback:
+  provider: openrouter
+  model: deepseek/deepseek-v4-flash
+  tasks_pattern: "^(research|strategy|ethics|animacion|learning|copy\\.alt_text)$|^(research|strategy|ethics|animacion|learning)\\."
+
+# Cuando OpenRouter falla para tareas DeepSeek → NIM (ya no aplica como primary,
+# pero se mantiene como seguro si alguna tarea queda con provider: openrouter +
+# modelo DeepSeek).
+openrouter_fallback:
+  provider: nvidia_nim
+  model: deepseek-ai/deepseek-v4-flash
+  tasks_pattern: "^(research|strategy|ethics|animacion|learning)\\."
+
+# =============================================================================
+# Fallbacks de modelo (dentro del mismo proveedor)
+# =============================================================================
+model_fallbacks:
+  "deepseek-ai/deepseek-v4-flash":
+    - deepseek-ai/deepseek-v4-pro
+  "deepseek/deepseek-v4-flash":
+    - deepseek/deepseek-v4-pro
+    - deepseek/deepseek-chat
   "anthropic/claude-sonnet-4.6":
     - anthropic/claude-sonnet-4.5
     - anthropic/claude-sonnet-4
-  "deepseek/deepseek-chat":
-    - deepseek/deepseek-v3
-    - openai/gpt-4o-mini

@@ -225,6 +225,20 @@ REGLAS CRÍTICAS — cualquier violación invalida la salida:
 ORDEN NARRATIVO POR DEFECTO (6 slides — sin BigQuote):
   Cover → Thesis → Comparative → Process → Stat → CTA
 
+PALETA POR TEMPLATE (NO cambies estos backgrounds CSS):
+  Cover      = teal   (#2B9E8F)
+  Thesis     = warm   (#FAFAF7)
+  Comparative= warm   (#FAFAF7)
+  Process    = cream  (#F5F0EB)
+  BigQuote   = cream  (#F5F0EB)
+  Stat       = teal-deep (#1E7A6D)
+  CTA        = dark   (#1A1C23)
+
+REGLA CROMÁTICA ESTRICTA: máx 2 slides consecutivos del mismo color de fondo.
+Thesis y Comparative son ambos 'warm' — el orden Cover→Thesis→Comparative→Process
+ya satisface la regla (teal, warm, warm, cream). NO repitas Thesis o Comparative
+juntas si ya hay otro warm en el orden; intercala Process (cream) o Stat (teal-deep).
+
 CUÁNDO INCLUIR BigQuote (slide 5°, antes de Stat):
   Solo si el brief incluye un caso real verificable con nombre y contexto. \
 Si no hay caso → omitir BigQuote (mes 1-3 estamos sin clientes reales).
@@ -273,7 +287,7 @@ def _generate_slides(
     )
 
     resp = router.call(
-        task="copy.carrusel_yaml",  # mismo task que carrusel-gestos para reusar routing a Sonnet
+        task="copy.carrusel_ds_html",  # tarea dedicada con max_tokens=16000 para 6-7 HTMLs completos
         messages=[
             {"role": "system", "content": system},
             {"role": "user",   "content": user},
@@ -305,34 +319,37 @@ def _parse_slides(raw: str) -> list[str]:
 
 
 def _validate_slides(slides: list[str]) -> None:
-    """Aplica todas las reglas duras. Lanza ValueError descriptivo si falla."""
+    """Aplica todas las reglas duras. Acumula todos los errores antes de lanzar."""
+    errors: list[str] = []
     n = len(slides)
+
     if n < 5 or n > 9:
         raise ValueError(f"Total de slides = {n} (debe estar entre 5 y 9)")
 
     # Cada HTML completo
     for i, html in enumerate(slides, start=1):
         if not re.search(r"<!DOCTYPE\s+html", html, re.IGNORECASE):
-            raise ValueError(f"slide-{i:02d}: falta `<!DOCTYPE html>` al inicio")
-        if "<html" not in html or "</html>" not in html:
-            raise ValueError(f"slide-{i:02d}: HTML incompleto (falta `<html>` o `</html>`)")
+            errors.append(f"slide-{i:02d}: falta `<!DOCTYPE html>` al inicio")
+        elif "<html" not in html or "</html>" not in html:
+            errors.append(f"slide-{i:02d}: HTML incompleto (falta `<html>` o `</html>`)")
         if 'href="../colors_and_type.css"' not in html:
-            raise ValueError(
+            errors.append(
                 f"slide-{i:02d}: falta `<link rel='stylesheet' href='../colors_and_type.css'>` "
                 "(no toques esa línea)"
             )
 
     # Footer index NN / NN
+    # Slide 1 (Cover) no tiene .idx — usa .tag; slide N (CTA) tampoco.
     for i, html in enumerate(slides, start=1):
+        if i == 1 or i == n:
+            continue
         idx_matches = re.findall(r'<b>\s*(\d{2})\s*</b>\s*/\s*(\d{2})', html)
         if not idx_matches:
-            # CTA puede no tener este patrón (no tiene .idx); chequear si es el último
-            if i == n:
-                continue
-            raise ValueError(f"slide-{i:02d}: no se encontró footer index `<b>NN</b> / NN`")
+            errors.append(f"slide-{i:02d}: no se encontró footer index `<b>NN</b> / NN`")
+            continue
         for cur, total in idx_matches:
             if int(cur) != i or int(total) != n:
-                raise ValueError(
+                errors.append(
                     f"slide-{i:02d}: footer index = {cur} / {total}, "
                     f"debería ser {i:02d} / {n:02d}"
                 )
@@ -342,24 +359,30 @@ def _validate_slides(slides: list[str]) -> None:
         text = " ".join(_extract_text(html)).lower()
         for pat in V1_FORBIDDEN_PATTERNS:
             if re.search(pat, text, re.IGNORECASE):
-                raise ValueError(
+                errors.append(
                     f"slide-{i:02d}: contiene patrón v1 prohibido `{pat}` — usa voz v2 del SOUL"
                 )
 
     # Comillas curvas
     for i, html in enumerate(slides, start=1):
         text = " ".join(_extract_text(html))
-        if any(c in text for c in '“”‘’'):
-            raise ValueError(f"slide-{i:02d}: comillas curvas detectadas — usa comillas rectas")
+        if any(c in text for c in '""'''):
+            errors.append(f"slide-{i:02d}: comillas curvas detectadas — usa comillas rectas")
 
     # Ritmo cromático: máx 2 surfaces consecutivos iguales
     surfaces = [_detect_surface(h) for h in slides]
     for i in range(len(surfaces) - 2):
         if surfaces[i] and surfaces[i] == surfaces[i+1] == surfaces[i+2]:
-            raise ValueError(
+            errors.append(
                 f"Ritmo cromático roto: 3 slides consecutivos con surface '{surfaces[i]}' "
-                f"(slides {i+1}, {i+2}, {i+3})"
+                f"(slides {i+1}, {i+2}, {i+3}). "
+                f"Paleta: Cover=teal, Thesis=warm, Comparative=warm, Process=cream, "
+                f"BigQuote=cream, Stat=teal-deep, CTA=dark. "
+                f"Intercala cream/dark entre los dos slides warm."
             )
+
+    if errors:
+        raise ValueError("\n".join(errors))
 
 
 def _detect_surface(html: str) -> str:
