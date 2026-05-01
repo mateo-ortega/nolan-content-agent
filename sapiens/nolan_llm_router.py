@@ -12,6 +12,7 @@ uso en logs/llm_usage.jsonl con lock de archivo.
 import fcntl
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass, field
@@ -207,17 +208,56 @@ class LLMRouter:
 
         self.guard.preflight(task, self.guard.estimate_cost(model, max_tokens))
 
-        if provider == "openrouter":
-            resp = self._call_openrouter(model, messages, max_tokens, temperature,
-                                         cache_system, spec)
-        elif provider == "perplexity":
-            resp = self._call_perplexity(model, messages, max_tokens, spec)
-        else:
-            raise ValueError(f"Provider desconocido: {provider}")
+        try:
+            if provider == "openrouter":
+                resp = self._call_openrouter(model, messages, max_tokens, temperature,
+                                             cache_system, spec)
+            elif provider == "perplexity":
+                resp = self._call_perplexity(model, messages, max_tokens, spec)
+            elif provider == "nvidia_nim":
+                resp = self._call_nvidia_nim(model, messages, max_tokens, temperature, spec)
+            else:
+                raise ValueError(f"Provider desconocido: {provider}")
+        except RuntimeError as primary_err:
+            fb = self._get_provider_fallback(task, provider)
+            if fb:
+                print(
+                    f"[llm-router] {provider} falló para '{task}', "
+                    f"usando fallback {fb['provider']}:{fb['model']}",
+                    file=sys.stderr,
+                )
+                if fb["provider"] == "nvidia_nim":
+                    resp = self._call_nvidia_nim(fb["model"], messages, max_tokens, temperature, spec)
+                elif fb["provider"] == "openrouter":
+                    resp = self._call_openrouter(fb["model"], messages, max_tokens, temperature,
+                                                 cache_system, spec)
+                else:
+                    raise primary_err
+                provider = fb["provider"]
+                model = fb["model"]
+            else:
+                raise primary_err
 
         resp.cost_usd = self.guard.compute_actual_cost(model, resp.usage)
         self.guard.record(task, model, provider, resp.usage, resp.cost_usd, piece_id)
         return resp
+
+    def _get_provider_fallback(self, task: str, failed_provider: str) -> Optional[dict]:
+        """Devuelve config del fallback de proveedor para la tarea, o None."""
+        key = f"{failed_provider}_fallback"
+        fb_cfg = self.routing.get(key, {})
+        if not fb_cfg:
+            return None
+        pattern = fb_cfg.get("tasks_pattern", "")
+        if pattern and not re.match(pattern, task):
+            return None
+        # Verificar que el fallback tiene su key de API disponible
+        target_provider = fb_cfg.get("provider", "")
+        if target_provider == "nvidia_nim" and not os.environ.get("NVIDIA_API_KEY", ""):
+            return None
+        if target_provider == "openrouter" and not os.environ.get("OPENROUTER_API_KEY", ""):
+            return None
+        return {"provider": target_provider, "model": fb_cfg["model"]}
 
     # ------------------------------------------------------------------
     def _resolve_spec(self, task: str) -> dict:
@@ -296,6 +336,40 @@ class LLMRouter:
             citations=data.get("citations", []),
         )
 
+    def _call_nvidia_nim(
+        self, model: str, messages: list, max_tokens: int, temperature: float, spec: dict
+    ) -> LLMResponse:
+        """NVIDIA NIM — OpenAI-compatible, gratis hasta 1000 req/mes."""
+        api_key = os.environ.get("NVIDIA_API_KEY", "")
+        if not api_key:
+            raise RuntimeError("Falta NVIDIA_API_KEY en el entorno")
+        base_url = "https://integrate.api.nvidia.com/v1"
+        payload: dict[str, Any] = {
+            "model": model,
+            "messages": list(messages),
+            "max_tokens": max_tokens,
+            "temperature": temperature,
+        }
+        if spec.get("response_format") == "json_object":
+            payload["response_format"] = {"type": "json_object"}
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        # Timeout amplio: NIM free tier es lento con payloads grandes (30-50 señales).
+        # Si igualmente falla → fallback a OR vía nvidia_nim_fallback.
+        data = self._post_with_retry(
+            f"{base_url}/chat/completions", headers, payload, "nvidia_nim", timeout_secs=120
+        )
+        choice = data["choices"][0]
+        usage = data.get("usage", {})
+        return LLMResponse(
+            text=choice["message"]["content"],
+            model_used=data.get("model", model),
+            usage=usage,
+            cost_usd=0.0,
+        )
+
     def _apply_cache_control(self, messages: list) -> list:
         result = []
         for msg in messages:
@@ -314,11 +388,14 @@ class LLMRouter:
                 result.append(msg)
         return result
 
-    def _post_with_retry(self, url: str, headers: dict, payload: dict, provider: str) -> dict:
+    def _post_with_retry(
+        self, url: str, headers: dict, payload: dict, provider: str,
+        timeout_secs: float = 120.0,
+    ) -> dict:
         max_retries = 3
         for attempt in range(max_retries):
             try:
-                with httpx.Client(timeout=120.0) as client:
+                with httpx.Client(timeout=timeout_secs) as client:
                     r = client.post(url, headers=headers, json=payload)
 
                 if r.status_code == 429:
@@ -336,10 +413,12 @@ class LLMRouter:
                 return r.json()
 
             except httpx.TimeoutException:
+                print(f"[llm-router] timeout {provider} intento {attempt+1}/{max_retries}", file=sys.stderr)
                 if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)
                     continue
-                raise
+                # Convierte a RuntimeError para que el fallback de proveedor lo capture
+                raise RuntimeError(f"Timeout agotado ({max_retries} intentos) para {provider}")
 
         raise RuntimeError(f"Agotados {max_retries} intentos para {provider}")
 
