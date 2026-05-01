@@ -33,12 +33,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from sapiens.nolan_llm_router import load_router   # noqa: E402
 
-SOURCES_CFG  = PROJECT_ROOT / "config" / "sources.yaml"
-SCHEMA_SQL   = PROJECT_ROOT / "memory" / "schemas" / "trends.sql"
-DB_PATH      = PROJECT_ROOT / "memory" / "trends.sqlite"
-LOG_PATH     = PROJECT_ROOT / "logs" / "research.log"
+SOURCES_CFG      = PROJECT_ROOT / "config" / "sources.yaml"
+SCHEMA_SQL       = PROJECT_ROOT / "memory" / "schemas" / "trends.sql"
+DB_PATH          = PROJECT_ROOT / "memory" / "trends.sqlite"
+LOG_PATH         = PROJECT_ROOT / "logs" / "research.log"
+EVERGREEN_PATH   = PROJECT_ROOT / "prompts" / "evergreen_topics.yaml"
+PIECES_DB_PATH   = PROJECT_ROOT / "memory" / "pieces.sqlite"
 
-ALL_NICHOS = ["jovenes_preicfes", "padres", "adultos_ia", "pymes"]
+ALL_NICHOS = ["jovenes_preicfes", "padres", "universitarios", "adultos_ia"]
 
 _CLASSIFY_SYSTEM = """Eres el analizador de senales de contenido de Nolan, agente de @sapiens.ed (Sapiens by Shift, Colombia).
 
@@ -127,6 +129,13 @@ def main():
     else:
         _log("[research] dry-run: omitiendo LLM")
 
+    # 5b. Floor evergreen: si el shortlist tiene < 3 temas, completar con evergreen
+    if len(shortlist) < 3:
+        evergreen_added = _fill_from_evergreen(shortlist, nichos)
+        if evergreen_added:
+            _log(f"[research] floor evergreen: +{len(evergreen_added)} temas añadidos")
+            shortlist.extend(evergreen_added)
+
     # 6. Escribir a DB
     if not args.dry_run:
         _write_signals(db, new_signals, ciclo_ts)
@@ -201,6 +210,8 @@ def _collect_google_trends(cfg: dict) -> list[dict]:
     if not keywords:
         return []
 
+    # Apify proxies requieren "Proxy external access" (plan pago). Google Trends
+    # falla con 429 desde IPs de datacenter; se maneja de forma silenciosa abajo.
     signals = []
     try:
         pt = TrendReq(hl="es-CO", tz=-300, timeout=(10, 30), retries=2, backoff_factor=1)
@@ -371,15 +382,119 @@ def _search_duckduckgo(queries: list[str]) -> list[dict]:
     return signals
 
 
+_APIFY_CADENCE_FILE = PROJECT_ROOT / "memory" / "apify_last_run.json"
+
+
+def _apify_cadence_ok(cadence_hours: int) -> bool:
+    """Devuelve True si han pasado al menos cadence_hours desde el último run de Apify."""
+    if not _APIFY_CADENCE_FILE.exists():
+        return True
+    try:
+        data = json.loads(_APIFY_CADENCE_FILE.read_text(encoding="utf-8"))
+        last_ts = datetime.fromisoformat(data.get("last_run", "2000-01-01T00:00:00+00:00"))
+        if last_ts.tzinfo is None:
+            last_ts = last_ts.replace(tzinfo=timezone.utc)
+        elapsed_h = (datetime.now(tz=timezone.utc) - last_ts).total_seconds() / 3600
+        return elapsed_h >= cadence_hours
+    except Exception:
+        return True
+
+
+def _apify_mark_run():
+    _APIFY_CADENCE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    _APIFY_CADENCE_FILE.write_text(
+        json.dumps({"last_run": datetime.now(tz=timezone.utc).isoformat()}),
+        encoding="utf-8",
+    )
+
+
 def _collect_apify(cfg: dict) -> list[dict]:
-    """Stub — activa cuando APIFY_TOKEN este disponible."""
+    """Scraping de posts recientes en IG y TT via Apify actors."""
     token = os.environ.get("APIFY_TOKEN", "")
     if not token:
-        _log("[research] INFO: sin APIFY_TOKEN, saltando scraping IG/TT (agregar a .env cuando disponible)")
+        _log("[research] INFO: sin APIFY_TOKEN, saltando scraping IG/TT")
         return []
-    # TODO: implementar con apify_client cuando el token este disponible
-    _log("[research] INFO: APIFY_TOKEN presente pero scraping IG/TT no implementado aun")
-    return []
+
+    try:
+        from apify_client import ApifyClient  # type: ignore
+    except ImportError:
+        _log("[research] WARN: apify-client no instalado (pip install apify-client)")
+        return []
+
+    apify_cfg = cfg.get("apify", {})
+    cadence_h = int(apify_cfg.get("instagram_profile_scraper", {}).get("cadence_hours", 48))
+    if not _apify_cadence_ok(cadence_h):
+        _log(f"[research] Apify: cadencia {cadence_h}h no cumplida, omitiendo scrape")
+        return []
+    ig_cfg    = apify_cfg.get("instagram_profile_scraper", {})
+    tt_cfg    = apify_cfg.get("tiktok_profile_scraper", {})
+    ig_handles = ig_cfg.get("benchmark_handles", [])
+    tt_handles = tt_cfg.get("benchmark_handles", [])
+    ig_limit   = ig_cfg.get("max_posts_per_run", 20)
+    tt_limit   = tt_cfg.get("max_videos_per_run", 15)
+
+    client  = ApifyClient(token)
+    signals = []
+    now_ts  = datetime.now(tz=timezone.utc).isoformat()
+
+    # --- Instagram ---
+    if ig_handles:
+        try:
+            run = client.actor("apify/instagram-profile-scraper").call(
+                run_input={"usernames": ig_handles, "resultsLimit": ig_limit},
+                timeout_secs=180,
+            )
+            for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+                handle = item.get("username", "")
+                for post in (item.get("latestPosts") or [])[:5]:
+                    url = post.get("url", "")
+                    if not url:
+                        continue
+                    caption = (post.get("caption") or "").strip()
+                    signals.append({
+                        "source_type": "ig",
+                        "source":      f"ig@{handle}",
+                        "title":       caption[:80] or f"IG post @{handle}",
+                        "url":         url,
+                        "summary":     caption[:300],
+                        "published":   post.get("timestamp", now_ts),
+                        "tags":        json.dumps(["instagram", "apify"]),
+                        "likes":       post.get("likesCount", 0),
+                        "comments":    post.get("commentsCount", 0),
+                    })
+        except Exception as e:
+            _log(f"[research] WARN Apify IG: {e}")
+
+    # --- TikTok ---
+    if tt_handles:
+        try:
+            run = client.actor("clockworks/tiktok-profile-scraper").call(
+                run_input={"profiles": tt_handles, "resultsPerPage": tt_limit},
+                timeout_secs=180,
+            )
+            for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+                url = item.get("webVideoUrl", "")
+                if not url:
+                    continue
+                text = (item.get("text") or "").strip()
+                signals.append({
+                    "source_type": "tt",
+                    "source":      "tiktok_apify",
+                    "title":       text[:80] or "TikTok video",
+                    "url":         url,
+                    "summary":     text[:300],
+                    "published":   item.get("createTimeISO", now_ts),
+                    "tags":        json.dumps(["tiktok", "apify"]),
+                    "plays":       item.get("playCount", 0),
+                    "likes":       item.get("diggCount", 0),
+                    "shares":      item.get("shareCount", 0),
+                })
+        except Exception as e:
+            _log(f"[research] WARN Apify TT: {e}")
+
+    _apify_mark_run()
+    _log(f"[research] Apify: {len(signals)} posts (IG+TT)")
+    return signals
 
 
 # ---------------------------------------------------------------------------
@@ -503,6 +618,26 @@ def _write_signals(db: sqlite3.Connection, signals: list[dict], ciclo_ts: str):
                     "(keyword, geo, scraped_at) VALUES (?,?,?)",
                     (s["title"], "CO", now)
                 )
+            elif st == "ig":
+                caption = s.get("summary", "")
+                db.execute(
+                    "INSERT OR IGNORE INTO signals_ig "
+                    "(hash_norm, source, post_url, caption, hook_text, likes, comments, scraped_at) "
+                    "VALUES (?,?,?,?,?,?,?,?)",
+                    (h, s["source"], s["url"], caption,
+                     caption.split("\n")[0][:100],
+                     s.get("likes", 0), s.get("comments", 0), now)
+                )
+            elif st == "tt":
+                desc = s.get("summary", "")
+                db.execute(
+                    "INSERT OR IGNORE INTO signals_tt "
+                    "(hash_norm, source, video_url, description, hook_text, plays, likes, shares, scraped_at) "
+                    "VALUES (?,?,?,?,?,?,?,?,?)",
+                    (h, s["source"], s["url"], desc,
+                     desc.split("\n")[0][:100],
+                     s.get("plays", 0), s.get("likes", 0), s.get("shares", 0), now)
+                )
         except Exception as e:
             _log(f"[research] WARN escribiendo senal: {e}")
     db.commit()
@@ -551,6 +686,75 @@ def _write_cycle(db, ciclo_ts, trigger, nichos, raw, new_signals, shortlist, cos
         db.commit()
     except Exception as e:
         _log(f"[research] WARN escribiendo ciclo: {e}")
+
+
+def _fill_from_evergreen(shortlist: list[dict], nichos: list[str]) -> list[dict]:
+    """
+    Completa el shortlist con temas evergreen curados si hay < 3 temas.
+    Excluye temas usados en piezas producidas en los últimos 14 días.
+    Marca cada tema añadido con source='evergreen'.
+    """
+    if not EVERGREEN_PATH.exists():
+        _log("[research] WARN: evergreen_topics.yaml no encontrado, saltando floor")
+        return []
+
+    try:
+        with open(EVERGREEN_PATH, encoding="utf-8") as f:
+            ev_data = yaml.safe_load(f)
+        ev_topics = ev_data.get("temas", [])
+    except Exception as e:
+        _log(f"[research] WARN cargando evergreen_topics.yaml: {e}")
+        return []
+
+    # IDs de temas usados recientemente en pieces.sqlite
+    used_ids: set[str] = set()
+    if PIECES_DB_PATH.exists():
+        try:
+            pc = sqlite3.connect(PIECES_DB_PATH)
+            rows = pc.execute(
+                "SELECT topic FROM pieces WHERE created_at >= date('now', '-14 days')"
+            ).fetchall()
+            pc.close()
+            used_ids = {r[0] for r in rows if r[0]}
+        except Exception:
+            pass
+
+    # IDs ya en el shortlist actual (por tema)
+    existing_temas = {s.get("tema", "").lower() for s in shortlist}
+
+    needed = 3 - len(shortlist)
+    added: list[dict] = []
+
+    for t in ev_topics:
+        if needed <= 0:
+            break
+        # Filtrar por nicho activo
+        if t.get("nicho") not in nichos:
+            continue
+        # Saltar si ya está en el shortlist
+        if t.get("tema", "").lower() in existing_temas:
+            continue
+        # Saltar si fue usado recientemente (por id o tema)
+        ev_id = t.get("id", "")
+        if ev_id in used_ids or t.get("tema", "") in used_ids:
+            continue
+        added.append({
+            "tema":              t["tema"],
+            "nicho":             t["nicho"],
+            "pillar":            t.get("pillar", "tecnica_densa"),
+            "angulo":            t.get("angulo_propuesto", ""),
+            "score":             0.5,
+            "formato_sugerido":  t.get("formato_sugerido", "carrusel"),
+            "ethics_risk":       "low",
+            "fuentes":           [],
+            "low_confidence":    False,
+            "conexion_metodo":   t.get("conexion_metodo", ""),
+            "source":            "evergreen",
+        })
+        existing_temas.add(t["tema"].lower())
+        needed -= 1
+
+    return added
 
 
 def _load_existing_shortlist(db: sqlite3.Connection, nichos: list[str]) -> list[dict]:

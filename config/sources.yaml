@@ -14,19 +14,23 @@ apify:
     cadence_hours: 48
     max_posts_per_run: 20
     benchmark_handles:
-      # Polar stars + benchmarks del nicho educativo CO
-      - "andres.bilbao"        # Rappi founder — autoridad
+      # ── Autoridad / edtech LATAM ─────────────────────────────────────────
+      - "andres.bilbao"        # Rappi founder — autoridad emprendimiento
       - "30x"                   # 30x brand — autoridad
-      - "platzi"                # edtech referente
+      - "platzi"                # edtech referente LATAM
       - "freddyveganet"         # Freddy Vega — fundador Platzi
       - "soyhenry"              # Soy Henry — bootcamp
       - "coderhouse"            # Coderhouse — bootcamp
       - "freecodecamp"          # freeCodeCamp — valor técnico
-      - "magicschoolai"         # MagicSchool AI — show-don't-tell IA+edu
-      # TBD — cuentas edtech CO para padres/preicfes (Mateo confirma fase 0)
-      # - "preicfes.oficial"
-      # - "rutasaber"
-      # - "academico.co"
+      - "magicschoolai"         # MagicSchool AI — IA+edu show-don't-tell
+      # ── Educación CO — nicho padres/preicfes ────────────────────────────
+      - "preicfes.oficial"      # pre-ICFES Colombia — mismo nicho directo
+      - "rutasaber"             # Ruta Saber — prep ICFES CO
+      - "academico.co"          # Académico CO — refuerzo escolar
+      # ── Ciencia del aprendizaje — feed tecnica_densa ────────────────────
+      - "aliabdaal"             # Ali Abdaal — productividad + ciencia del aprendizaje
+      - "andrewhuberman"        # Andrew Huberman — neurociencia (memoria, foco)
+      - "khanacademy"           # Khan Academy — pedagogía basada en evidencia
 
   tiktok_profile_scraper:
     actor_id: "clockworks/tiktok-profile-scraper"
@@ -36,7 +40,8 @@ apify:
       - "platzi"
       - "30xbrand"
       - "magicschoolai"
-      # TBD
+      - "aliabdaal"             # Ali Abdaal — aprendizaje + productividad
+      - "andrewhuberman"        # Huberman Lab — neurociencia del aprendizaje
 
   # Presupuesto Apify (tracked separado)
   budget_usd_per_month_cap: 10
@@ -74,6 +79,20 @@ rss:
     - name: "Semana Educación"
       url: "https://www.semana.com/rss/educacion/"
       tags: [prensa, educacion, colombia]
+    # Educación parental / ciencia del aprendizaje
+    - name: "Edutopia"
+      url: "https://www.edutopia.org/rss.xml"
+      tags: [educacion, ciencia_aprendizaje, padres]
+    # Universitarios LATAM — noticias académicas
+    - name: "UNAL Noticias"
+      url: "https://unal.edu.co/rss/noticias.xml"
+      tags: [universitarios, colombia, unal]
+    - name: "UdeA Noticias"
+      url: "https://www.udea.edu.co/wps/portal/udea/web/inicio/rss"
+      tags: [universitarios, colombia, udea]
+    - name: "EAFIT Noticias"
+      url: "https://www.eafit.edu.co/noticias/rss"
+      tags: [universitarios, colombia, eafit]
     # TBD — Mateo puede sumar feeds específicos
 
 # =============================================================================

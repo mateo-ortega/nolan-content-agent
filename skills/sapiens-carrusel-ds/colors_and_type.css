@@ -1,0 +1,239 @@
+/* =========================================================================
+   sapiens by shift — Design Tokens
+   Source of truth: Sapiens Brand Guidelines v1.0 (2026)
+   Light-mode primary. Teal-driven. Warm white surfaces.
+   ========================================================================= */
+
+/* ---------- Font faces (self-hosted from /fonts) ---------- */
+@font-face {
+  font-family: 'Outfit';
+  src: url('./fonts/Outfit-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('./fonts/InstrumentSans-VariableFont.ttf') format('truetype-variations');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('./fonts/InstrumentSans-Italic.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('./fonts/GeistMono-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Jura';
+  src: url('./fonts/Jura-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Design tokens — LIGHT (default) ---------- */
+:root {
+  /* Brand — Teal */
+  --s-teal:            #2B9E8F;   /* primary */
+  --s-teal-deep:       #1E7A6D;   /* hover / pressed / deep surfaces */
+  --s-teal-soft:       #E6F5F2;   /* tinted backgrounds */
+  --s-teal-bright:     #3DBDAD;   /* dark-mode primary */
+
+  /* Brand — Gold (secondary, inherited from Shift) */
+  --s-gold:            #E8A838;   /* warm gold — achievements */
+  --s-gold-pale:       #FFF5E0;   /* gold tint */
+  --s-gold-achieve:    #F5C542;   /* achievement accent */
+
+  /* Surfaces */
+  --s-bg:              #FAFAF7;   /* warm white — page default */
+  --s-surface:         #FFFFFF;   /* cards / inputs */
+  --s-surface-alt:     #F5F0EB;   /* cream alt — sections */
+  --s-border:          #E0DCD6;   /* hairline borders */
+  --s-border-strong:   #CFC9C0;
+
+  /* Text */
+  --s-fg:              #1A1C23;   /* primary text */
+  --s-fg-muted:        #6B6B6B;   /* secondary */
+  --s-fg-subtle:       #9A9A9A;   /* tertiary / captions */
+  --s-fg-inverse:      #FAFAF7;   /* on teal / on dark */
+
+  /* Semantic — tuned to sapiens warm palette (no cold Material greens/blues) */
+  --s-success:         #2B9E8F;   /* teal does double duty */
+  --s-success-tint:    #E6F5F2;
+  --s-warning:         #E8A838;   /* warm gold */
+  --s-warning-tint:    #FFF5E0;
+  --s-error:           #C9524A;   /* warm terracotta */
+  --s-error-tint:      #FBEAE7;
+  --s-info:            #1E7A6D;   /* deep teal for info messaging */
+  --s-info-tint:       #E6F5F2;
+  --s-achievement:     #F5C542;
+
+  /* Spacing — 8-point base (plus 4px micro step) */
+  --s-space-xs:        4px;
+  --s-space-sm:        8px;
+  --s-space-md:        16px;
+  --s-space-lg:        24px;
+  --s-space-xl:        32px;
+  --s-space-2xl:       48px;
+  --s-space-3xl:       64px;
+  --s-space-4xl:       96px;
+
+  /* Radii — softer than Shift */
+  --s-radius-sm:       6px;
+  --s-radius-md:       10px;
+  --s-radius-lg:       14px;
+  --s-radius-xl:       20px;
+  --s-radius-full:     9999px;
+
+  /* Shadows */
+  --s-shadow-sm:       0 1px 3px rgba(26, 28, 35, 0.06);
+  --s-shadow-md:       0 4px 12px rgba(26, 28, 35, 0.08);
+  --s-shadow-lg:       0 8px 24px rgba(26, 28, 35, 0.10);
+  --s-shadow-xl:       0 16px 48px rgba(26, 28, 35, 0.12);
+  --s-glow:            0 0 20px rgba(43, 158, 143, 0.15);
+
+  /* Motion */
+  --s-ease:            cubic-bezier(0.2, 0.8, 0.2, 1);
+  --s-ease-out:        cubic-bezier(0.16, 1, 0.3, 1);
+  --s-dur-fast:        120ms;
+  --s-dur-base:        200ms;
+  --s-dur-slow:        360ms;
+
+  /* Type families */
+  --s-font-display:    'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --s-font-body:       'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --s-font-mono:       'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --s-font-label:      'Jura', ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale */
+  --s-fs-display:      clamp(40px, 6vw, 72px);
+  --s-fs-h1:           40px;
+  --s-fs-h2:           30px;
+  --s-fs-h3:           22px;
+  --s-fs-body-lg:      18px;
+  --s-fs-body:         16px;
+  --s-fs-body-sm:      14px;
+  --s-fs-label:        11px;
+  --s-fs-mono:         13px;
+}
+
+/* ---------- Dark mode (L2: adults / technical / AI workflows) ---------- */
+[data-theme="dark"] {
+  --s-teal:            #3DBDAD;
+  --s-teal-deep:       #2B9E8F;
+  --s-teal-soft:       #14302C;
+  --s-gold:            #F0B84A;
+  --s-bg:              #0F0F12;
+  --s-surface:         #1A1C22;
+  --s-surface-alt:     #22242C;
+  --s-border:          #2A2D35;
+  --s-border-strong:   #3A3D47;
+  --s-fg:              #E8E6E1;
+  --s-fg-muted:        #A0A0A0;
+  --s-fg-subtle:       #6B6B6B;
+  --s-fg-inverse:      #0F0F12;
+  --s-shadow-sm:       0 1px 3px rgba(0, 0, 0, 0.4);
+  --s-shadow-md:       0 4px 12px rgba(0, 0, 0, 0.45);
+  --s-shadow-lg:       0 8px 24px rgba(0, 0, 0, 0.55);
+  --s-shadow-xl:       0 16px 48px rgba(0, 0, 0, 0.65);
+  --s-glow:            0 0 24px rgba(61, 189, 173, 0.25);
+}
+
+/* ---------- Semantic type roles ---------- */
+.s-display {
+  font-family: var(--s-font-display);
+  font-weight: 700;
+  font-size: var(--s-fs-display);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--s-fg);
+}
+.s-h1 {
+  font-family: var(--s-font-display);
+  font-weight: 700;
+  font-size: var(--s-fs-h1);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--s-fg);
+}
+.s-h2 {
+  font-family: var(--s-font-display);
+  font-weight: 600;
+  font-size: var(--s-fs-h2);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--s-fg);
+}
+.s-h3 {
+  font-family: var(--s-font-display);
+  font-weight: 600;
+  font-size: var(--s-fs-h3);
+  line-height: 1.25;
+  color: var(--s-fg);
+}
+.s-body-lg {
+  font-family: var(--s-font-body);
+  font-weight: 400;
+  font-size: var(--s-fs-body-lg);
+  line-height: 1.65;
+  color: var(--s-fg);
+}
+.s-body {
+  font-family: var(--s-font-body);
+  font-weight: 400;
+  font-size: var(--s-fs-body);
+  line-height: 1.6;
+  color: var(--s-fg);
+}
+.s-body-sm {
+  font-family: var(--s-font-body);
+  font-weight: 400;
+  font-size: var(--s-fs-body-sm);
+  line-height: 1.5;
+  color: var(--s-fg-muted);
+}
+.s-label {
+  font-family: var(--s-font-label);
+  font-weight: 500;
+  font-size: var(--s-fs-label);
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--s-fg-muted);
+}
+.s-mono {
+  font-family: var(--s-font-mono);
+  font-weight: 400;
+  font-size: var(--s-fs-mono);
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--s-fg-muted);
+}
+.s-wordmark {
+  font-family: var(--s-font-display);
+  font-weight: 700;
+  text-transform: lowercase;
+  letter-spacing: -0.03em;
+}
+
+/* ---------- Base resets for previews ---------- */
+.s-reset, .s-reset * { box-sizing: border-box; }
+.s-reset {
+  margin: 0;
+  font-family: var(--s-font-body);
+  color: var(--s-fg);
+  background: var(--s-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}

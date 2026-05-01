@@ -12,18 +12,19 @@ target_pieces_per_week:
 
 # Mix por formato (porcentajes orientativos; Nolan puede ajustar por tema)
 format_mix_weekly:
-  carrusel: 0.30       # 30% — formato dominante por velocidad + densidad
+  carrusel: 0.20       # 20% — gestos tipográficos (L+D)
+  carrusel_ds: 0.10    # 10% — design system estructurado (J)
   animacion: 0.20      # 20% — una matemática/física por semana típicamente
   voiceover_broll: 0.20 # 20% — uno con b-roll + TTS o guión para Mateo
   talking_head: 0.30   # 30% — guion para Mateo cuando amerita cara humana
 
-# Mix por nicho (foco v1 — ver SAPIENS_BRAND_IDENTITY.md §Foco v1)
+# Mix por nicho (v2 — alineado con funnel comercial de Ruta Sapiens)
 niche_mix_weekly:
-  jovenes_preicfes: 0.15
-  padres: 0.50
-  adultos_ia: 0.20
-  pymes: 0.10
-  cruzado_l1_l2: 0.05  # piezas que cruzan audiencias (ej: "IA para estudiar")
+  padres: 0.50           # PRIMARIO — buyer directo de Ruta Sapiens
+  jovenes_preicfes: 0.20 # SECUNDARIO — end-user; padres comparten contenido sobre ellos
+  universitarios: 0.15   # SECUNDARIO — padres con hijos en uni también compran
+  adultos_ia: 0.10       # TERCIARIO — solo si conecta con aprendizaje/estudio (sin Ruta IA)
+  cruzado_l1_l2: 0.05   # piezas que cruzan audiencias (ej: "IA para estudiar")
 
 # Schedule de scheduler (cron en zona Bogotá)
 schedule:

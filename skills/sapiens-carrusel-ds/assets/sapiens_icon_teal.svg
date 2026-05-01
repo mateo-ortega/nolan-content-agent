@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <g transform="scale(0.6250)" fill="#2B9E8F">
+    <g fill="none" stroke="#2B9E8F" stroke-width="2.5" stroke-linecap="round">
+    
+    <line x1="68" y1="252" x2="108" y2="204"></line>
+    <line x1="108" y1="204" x2="148" y2="172"></line>
+    <line x1="148" y1="172" x2="196" y2="132"></line>
+    <line x1="196" y1="132" x2="240" y2="92"></line>
+    <line x1="240" y1="92" x2="260" y2="68"></line>
+    
+    <line x1="108" y1="204" x2="92" y2="152"></line>
+    <line x1="92" y1="152" x2="120" y2="104"></line>
+    <line x1="120" y1="104" x2="164" y2="72"></line>
+    
+    <line x1="148" y1="172" x2="208" y2="180"></line>
+    <line x1="208" y1="180" x2="256" y2="152"></line>
+    
+    <line x1="120" y1="104" x2="196" y2="132" stroke-opacity="0.4"></line>
+    
+    <line x1="208" y1="180" x2="244" y2="208"></line>
+  </g>
+  <g fill="#2B9E8F">
+    
+    <circle cx="68" cy="252" r="12"></circle>
+    
+    <circle cx="108" cy="204" r="8"></circle>
+    
+    <circle cx="148" cy="172" r="7"></circle>
+    <circle cx="92" cy="152" r="6"></circle>
+    
+    <circle cx="196" cy="132" r="7"></circle>
+    <circle cx="120" cy="104" r="6"></circle>
+    <circle cx="208" cy="180" r="6"></circle>
+    
+    <circle cx="260" cy="68" r="8"></circle>   
+    <circle cx="164" cy="72" r="6"></circle>   
+    <circle cx="256" cy="152" r="5"></circle>   
+    <circle cx="240" cy="92" r="5.5"></circle>
+    <circle cx="244" cy="208" r="4.5"></circle>
+  </g>
+  </g>
+</svg>

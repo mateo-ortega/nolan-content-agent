@@ -12,6 +12,7 @@ Salida: staging/<piece_id>/ con content.yaml, slides PNG, caption.md,
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -65,22 +66,37 @@ def main():
     gate: EthicsGate = load_gate()
     llm_cost_total = 0.0
 
-    # ── 1. Generar content.yaml ──────────────────────────────────────────────
+    # ── 1. Generar y validar content.yaml (con 1 reintento si falla validación)
     content_yaml_path = staging / "content.yaml"
     if args.dry_run:
         fixture = PROJECT_ROOT / "staging" / "fixtures" / "content_min.yaml"
         shutil.copy(fixture, content_yaml_path)
         print("[produce-carrusel] dry-run: copiado content_min.yaml como content.yaml")
+        with open(content_yaml_path, encoding="utf-8") as f:
+            content: dict = yaml.safe_load(f)
+        _validate_content_yaml(content, content_yaml_path)
     else:
-        raw, cost = _generate_content_yaml(router, brief, piece_id)
-        content_yaml_path.write_text(raw, encoding="utf-8")
-        llm_cost_total += cost
-        print(f"[produce-carrusel] content.yaml generado (costo=${cost:.4f})")
-
-    # ── 2. Validar YAML ──────────────────────────────────────────────────────
-    with open(content_yaml_path, encoding="utf-8") as f:
-        content: dict = yaml.safe_load(f)
-    _validate_content_yaml(content, content_yaml_path)
+        hint = ""
+        content = {}
+        for attempt in range(2):
+            raw, cost = _generate_content_yaml(router, brief, piece_id, hint=hint)
+            content_yaml_path.write_text(raw, encoding="utf-8")
+            llm_cost_total += cost
+            print(f"[produce-carrusel] content.yaml generado (intento {attempt + 1}, costo=${cost:.4f})")
+            try:
+                with open(content_yaml_path, encoding="utf-8") as f:
+                    content = yaml.safe_load(f)
+                _validate_content_yaml(content, content_yaml_path)
+                break
+            except (ValueError, yaml.YAMLError) as exc:
+                if attempt == 0:
+                    hint = f"\n\nERROR DE VALIDACIÓN — corrige antes de reenviar:\n{exc}"
+                    print(
+                        f"[produce-carrusel] WARN intento 1 inválido: {exc} — reintentando…",
+                        file=sys.stderr,
+                    )
+                else:
+                    raise
     print("[produce-carrusel] content.yaml válido")
 
     # ── 3. Ethics pre-render ─────────────────────────────────────────────────
@@ -129,7 +145,7 @@ def main():
     )
 
     print(f"[produce-carrusel] OK → {staging}  (costo_total=${llm_cost_total:.4f})")
-    print(json.dumps({"piece_id": piece_id, "staging": str(staging), "status": "ready"}))
+    print(json.dumps({"piece_id": piece_id, "staging": str(staging), "status": "ok"}))
 
 
 # ---------------------------------------------------------------------------
@@ -158,17 +174,18 @@ REGLAS CRÍTICAS — cualquier violación invalida el YAML:
 8. Gestos permitidos para `interior`: tachadura, escala, repeticion, inversion, fragmentacion. NO USES el gesto bloque.
 9. El campo `eyebrow` (la ETIQUETA numerada superior) para portada y cta va en la raíz de su objeto, pero para interiores debe ir siempre DENTRO del objeto `g`.
 10. Devuelve SOLO el YAML, sin bloques markdown ni explicaciones.
-11. **LÍMITES DE CARACTERES POR GESTO** — el render desbordará silenciosamente si excedes estos topes. Los caracteres incluyen espacios pero NO los tags `<br>`:
-    - `escala` (tipografía 210px): palabra individual máx 8 chars · `pre`+`accent`+`post` totales ≤ 35 chars · usa al menos un `<br>` para partir.
+11. **LÍMITES DE CARACTERES POR GESTO** — el render fallará si excedes estos topes. Los caracteres incluyen espacios pero NO los tags `<br>`:
+    - `escala` (tipografía 210px): `accent` = UNA sola palabra-concepto (el héroe visual del slide). `pre` y `post` son conectores gramaticales mínimos — NO frases completas. NINGUNA palabra individual en `pre` o `post` puede superar 7 chars. `accent` máx 10 chars. Total `pre`+`accent`+`post` ≤ 50 chars (sin `<br>`). Correcto: pre='aprende a<br>', accent='leer', post='<br>más rápido.' · Incorrecto: pre='la habilidad de colaborar en equipo'.
     - `fragmentacion` (tipografía 180-220px): cada `text` máx 8 chars · `left` ≤ '55%' · `top` ≤ '65%' · `size` ≤ '200px'.
-    - `tachadura` (tipografía 120px): cada palabra máx 12 chars · `pre`+`strike`+`mid`+`emphasis`+`post` totales ≤ 60 chars.
-    - `inversion` (tipografía 120px): cada palabra máx 12 chars · `pre`+`flipped`+`post` totales ≤ 50 chars · `flipped` máx 8 chars (rota 180°).
-    - `repeticion` (tipografía 120px): cada `word` máx 14 chars · 3 palabras (la 4ta queda fuera de canvas).
+    - `tachadura` (tipografía 84px): `pre`+`strike`+`mid`+`emphasis`+`post` totales ≤ 80 chars.
+    - `inversion` (tipografía 84px): `pre`+`flipped`+`post` totales ≤ 60 chars · `flipped` máx 8 chars (rota 180°).
+    - `repeticion` (tipografía 120px): cada `word` máx 14 chars · máx 3 palabras (la 4ta queda fuera de canvas).
     - `portada.hero`: `hero_pre`+`hero_accent`+`hero_post` totales ≤ 60 chars · cada palabra máx 14 chars · usa `<br>` cada 2-3 palabras.
     - `cta.hero`: máx 12 chars (idealmente solo "sapiens").
     - `body` (cualquier slide): máx 140 chars con `<br>` cada ~50.
     Si un concepto requiere más caracteres → reformula más corto, parte con `<br>`, o cambia de gesto.
-12. **PROHIBIDO palabras compuestas largas sin partir.** "herramientas" (12 chars) cabe en gestos 120px pero NO en 210px (escala/fragmentacion). Para conceptos largos, usa el gesto adecuado o reformula a sinónimo más corto ("apps", "métodos", "claves").
+12. **PROHIBIDO palabras largas en gestos de tipografía grande.** En `escala` y `fragmentacion` (210px), palabras de más de 7 chars casi no caben en una línea. Usa sinónimos cortos: "apps" en vez de "aplicaciones", "método" en vez de "metodología", "saber" en vez de "conocimiento". En `escala`, el campo `accent` es SIEMPRE una sola palabra: es el concepto central del slide, no una frase. Si el tema requiere una frase completa → cambia el gesto a `tachadura` o `inversion`.
+13. **Conexión con Sapiens cuando sea natural.** Si el tema permite tocar el método (diagnóstico, ruta personalizada, tutor humano, ciencia del aprendizaje aplicada), aprovecha UN slide interior para hacerlo de forma orgánica. No es obligatorio en cada carrusel — pero nunca lo fuerces. El vocabulario sapiens (diagnosticar, ruta, método, evidencia, claridad, proceso, diseñado) debe estar presente de forma continua en todo el copy — esa es la conexión implícita mínima. NUNCA posicionar la IA como 'par que razona', 'colega', 'agente que decide' o entidad con agencia. La IA es herramienta del método, no protagonista. El sujeto activo de cada frase debe ser el humano (el estudiante, el tutor, el método) — nunca el modelo.
 
 SCHEMA DEL RENDERER (cópialo exactamente en su estructura y llaves):
 
@@ -208,9 +225,9 @@ slides:
     label_indice: 'paso 2'
     g:
       eyebrow: '02 · EYEBROW LABEL'
-      pre: 'el secreto es<br>'
-      accent: 'identificar'
-      post: '<br>el argumento.'
+      pre: 'el secreto<br>'
+      accent: 'entender'
+      post: '<br>el patrón.'
       subline: 'Frase breve de apoyo.'
 
   # --- INTERIOR — repeticion (refuerzo iterativo) ---
@@ -268,13 +285,15 @@ slides:
     eyebrow: '06 · CIERRE'
     hero_size: '140px'
     hero: 'sapiens'
-    body: 'Guardá esto para tu examen.'
-    tagline: 'aprende a tu medida'
+    body: 'Guarda esto y aplícalo esta semana.'
+    tagline: 'tu ruta. diseñada con método.'
     bio_text: 'link en bio'
 """
 
 
-def _generate_content_yaml(router: LLMRouter, brief: dict, piece_id: str) -> tuple[str, float]:
+def _generate_content_yaml(
+    router: LLMRouter, brief: dict, piece_id: str, hint: str = ""
+) -> tuple[str, float]:
     soul = SOUL_PATH.read_text(encoding="utf-8")
     brand = BRAND_PATH.read_text(encoding="utf-8")
     system = _CARRUSEL_SYSTEM_TEMPLATE.format(soul=soul, brand=brand)
@@ -282,6 +301,7 @@ def _generate_content_yaml(router: LLMRouter, brief: dict, piece_id: str) -> tup
     user = (
         f"piece_id (campo `nombre` del YAML): {piece_id}\n\n"
         f"Genera el content.yaml para esta pieza:\n\n{brief_str}"
+        + hint
     )
 
     resp = router.call(
@@ -358,6 +378,72 @@ def _validate_content_yaml(content: dict, path: Path):
         for v in _collect_slide_texts({"slides": [s]}):
             if any(c in v for c in '\u201c\u201d\u2018\u2019'):
                 raise ValueError(f"Slide tipo={tipo}: comillas curvas detectadas — reintentar")
+
+    # ── Validación de límites por gesto ─────────────────────────────────────
+    def _strip_br(t: str) -> str:
+        return re.sub(r'<br\s*/?>', ' ', t)
+
+    def _words(t: str) -> list:
+        return [re.sub(r'[^\w]', '', w) for w in _strip_br(t).split() if w]
+
+    for s in slides:
+        if s.get("tipo") != "interior":
+            continue
+        g = s.get("g") or {}
+        gesto = s.get("gesto", "")
+
+        if gesto == "escala":
+            accent = _strip_br(g.get("accent", ""))
+            if len(accent) > 10:
+                raise ValueError(
+                    f"escala·accent: '{accent}' tiene {len(accent)} chars (máx 10). "
+                    f"Usa una palabra más corta o un sinónimo."
+                )
+            if len(accent.split()) > 2:
+                raise ValueError(
+                    f"escala·accent: '{accent}' tiene {len(accent.split())} palabras. "
+                    f"accent debe ser UNA sola palabra-concepto (el héroe visual)."
+                )
+            for field in ("pre", "post"):
+                for word in _words(g.get(field, "")):
+                    if len(word) > 7:
+                        raise ValueError(
+                            f"escala·{field}: la palabra '{word}' tiene {len(word)} chars (máx 7). "
+                            f"Usa sinónimo más corto o reformula."
+                        )
+            total = len(_strip_br(
+                g.get("pre", "") + g.get("accent", "") + g.get("post", "")
+            ))
+            if total > 50:
+                raise ValueError(f"escala: total {total} chars > 50 (máx 50)")
+
+        elif gesto == "tachadura":
+            total = len(_strip_br(
+                "".join(g.get(f, "") for f in ("pre", "strike", "mid", "emphasis", "post"))
+            ))
+            if total > 80:
+                raise ValueError(f"tachadura: total {total} chars > 80 (máx 80)")
+
+        elif gesto == "inversion":
+            flipped = _strip_br(g.get("flipped", ""))
+            if len(flipped) > 8:
+                raise ValueError(f"inversion·flipped: '{flipped}' tiene {len(flipped)} chars (máx 8)")
+            total = len(_strip_br(
+                g.get("pre", "") + g.get("flipped", "") + g.get("post", "")
+            ))
+            if total > 60:
+                raise ValueError(f"inversion: total {total} chars > 60 (máx 60)")
+
+        elif gesto == "repeticion":
+            words = g.get("words") or []
+            if not words:
+                raise ValueError("repeticion: falta el campo 'words' (lista de palabras grandes)")
+            if len(words) > 3:
+                raise ValueError(f"repeticion: {len(words)} palabras > 3 (la 4ta queda fuera del canvas)")
+            for w in words:
+                wc = _strip_br(str(w)).strip()
+                if len(wc) > 14:
+                    raise ValueError(f"repeticion: '{wc}' tiene {len(wc)} chars (máx 14 por word)")
 
 
 # ---------------------------------------------------------------------------

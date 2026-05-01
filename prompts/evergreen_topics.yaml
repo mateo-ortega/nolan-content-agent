@@ -1,0 +1,168 @@
+# prompts/evergreen_topics.yaml — pool de temas evergreen curados para Sapiens
+#
+# Estos temas son válidos en cualquier ciclo de research.
+# Se usan como floor: si el shortlist del LLM tiene < 3 temas, se completan
+# con temas de esta lista que no se hayan usado en los últimos 14 días.
+#
+# Restricción mes 1-3: solo pillar tecnica_densa y filosofia_educativa.
+# Todos los temas aquí son intemporales — no requieren noticias recientes.
+
+temas:
+
+  # ── PADRES ─────────────────────────────────────────────────────────────────
+
+  - id: "padres-bloqueo-vs-esfuerzo"
+    tema: "Bloqueo conceptual vs falta de esfuerzo"
+    nicho: padres
+    pillar: filosofia_educativa
+    angulo_propuesto: "Cómo distinguir si tu hijo no entiende el concepto base o simplemente no está estudiando — señales concretas y qué hacer en cada caso."
+    conexion_metodo: "El diagnóstico de prerequisitos de Sapiens identifica exactamente este punto antes de diseñar la ruta."
+    formato_sugerido: carrusel
+
+  - id: "padres-sistema-masivo-falla"
+    tema: "Por qué el refuerzo masivo no sube las notas"
+    nicho: padres
+    pillar: filosofia_educativa
+    angulo_propuesto: "El problema de las tutorías tradicionales: repiten el mismo contenido sin diagnosticar dónde está el hueco real de comprensión."
+    conexion_metodo: "La Ruta Sapiens parte de un diagnóstico antes de prescribir cualquier plan de estudio."
+    formato_sugerido: carrusel
+
+  - id: "padres-señales-bloqueo"
+    tema: "5 señales de que tu hijo tiene un bloqueo conceptual"
+    nicho: padres
+    pillar: filosofia_educativa
+    angulo_propuesto: "Señales específicas y observables que indican un problema de comprensión base, no de actitud o esfuerzo."
+    conexion_metodo: "Diagnosticar estas señales es el primer paso del proceso Sapiens."
+    formato_sugerido: carrusel
+
+  - id: "padres-diagnostico-vs-preparacion"
+    tema: "Diagnóstico vs preparación: cuál va primero"
+    nicho: padres
+    pillar: filosofia_educativa
+    angulo_propuesto: "La diferencia entre preparar al estudiante para el ICFES sin saber qué falla vs diagnosticar primero y preparar con método."
+    conexion_metodo: "El Documento de Ruta de Sapiens es el resultado tangible de hacer el diagnóstico antes."
+    formato_sugerido: carrusel
+
+  - id: "padres-mito-matematicas"
+    tema: "El mito de 'no soy bueno para las matemáticas'"
+    nicho: padres
+    pillar: filosofia_educativa
+    angulo_propuesto: "La ciencia del aprendizaje muestra que la dificultad en matemáticas es casi siempre un prerequisito no cerrado, no una limitación innata."
+    conexion_metodo: "El diagnóstico de Sapiens mapea exactamente qué prerequisito falta, no solo 'matemáticas en general'."
+    formato_sugerido: carrusel
+
+  - id: "padres-spaced-repetition"
+    tema: "Por qué tu hijo estudia mucho y olvida todo"
+    nicho: padres
+    pillar: tecnica_densa
+    angulo_propuesto: "La curva del olvido de Ebbinghaus y por qué estudiar el día antes del examen es el método menos eficiente que existe."
+    conexion_metodo: "Las rutas de estudio de Sapiens distribuyen el trabajo según evidencia de espaciado óptimo."
+    formato_sugerido: carrusel
+
+  # ── JÓVENES PRE-ICFES ──────────────────────────────────────────────────────
+
+  - id: "jovenes-prerequisitos-icfes"
+    tema: "El prerequisito que te está bloqueando en el ICFES"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Cómo identificar qué tema base está causando que falle un tema más avanzado en el ICFES — con el mapa de dependencias de matemáticas."
+    conexion_metodo: "El diagnóstico de prerequisitos Sapiens automatiza este mapa para cada estudiante."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-lectura-critica"
+    tema: "Lectura crítica ICFES sin memorizar reglas"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "El método para identificar la intención del autor y la estructura del argumento — las dos preguntas que resuelven el 70% de los ítems de lectura crítica."
+    conexion_metodo: "Este es el tipo de framework que Sapiens enseña como parte del método de comprensión textual."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-ilusión-competencia"
+    tema: "La ilusión de competencia al estudiar"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Por qué releer los apuntes se siente productivo pero es el método de estudio menos eficiente — y qué hacer en cambio (testing effect)."
+    conexion_metodo: "El método Sapiens usa pruebas de recuperación activa para medir comprensión real, no percepción."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-interleaving"
+    tema: "Por qué estudiar una sola materia por día no funciona"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Interleaving vs blocked practice: la investigación muestra que mezclar temas en una sesión de estudio mejora la retención a largo plazo."
+    conexion_metodo: "Las rutas de estudio Sapiens aplican este principio en el calendario semanal de cada estudiante."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-metacognicion"
+    tema: "Metacognición: estudiar cómo estudias"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Qué es la metacognición y cómo los estudiantes con mejor desempeño la usan para detectar cuándo no están entendiendo realmente."
+    conexion_metodo: "El proceso de diagnóstico Sapiens entrena esta habilidad desde la primera sesión."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-razonamiento-cuantitativo"
+    tema: "Razonamiento cuantitativo ICFES sin memorizar fórmulas"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Los ítems de razonamiento cuantitativo ICFES evalúan interpretación de datos, no cálculo — y hay 4 tipos de pregunta que cubren el 80% del puntaje."
+    conexion_metodo: "Mapear qué tipos dominas y cuáles no es el diagnóstico que hace Sapiens antes del plan de preparación."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-curva-olvido"
+    tema: "La curva del olvido y cómo derrotarla"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Ebbinghaus midió que el 70% de lo aprendido se olvida en 24h sin repaso. Cómo usar el espaciado óptimo para retener con menos tiempo de estudio."
+    conexion_metodo: "El calendario de repaso de la Ruta Sapiens está calculado con base en este principio."
+    formato_sugerido: carrusel
+
+  - id: "jovenes-rutina-estudio"
+    tema: "Cómo diseñar una rutina de estudio con ciencia detrás"
+    nicho: jovenes_preicfes
+    pillar: tecnica_densa
+    angulo_propuesto: "Los tres principios de la ciencia cognitiva que deben guiar una rutina de estudio efectiva — y cómo aplicarlos en una semana real de grado 11."
+    conexion_metodo: "Diseñar esta rutina personalizada es parte de lo que entrega el Documento de Ruta de Sapiens."
+    formato_sugerido: carrusel
+
+  # ── UNIVERSITARIOS ─────────────────────────────────────────────────────────
+
+  - id: "uni-calculo-prerequisitos"
+    tema: "Por qué fallas Cálculo I sin fallar matemáticas"
+    nicho: universitarios
+    pillar: tecnica_densa
+    angulo_propuesto: "El mapa de prerequisitos de Cálculo I: qué conceptos de álgebra, trigonometría y geometría analítica son base — y cuál es el más frecuentemente débil en estudiantes LATAM."
+    conexion_metodo: "Identificar este prerequisito específico antes del semestre es exactamente lo que hace el diagnóstico Sapiens para universitarios."
+    formato_sugerido: carrusel
+
+  - id: "uni-quimica-prerequisitos"
+    tema: "El prerequisito de química general que nadie diagnostica"
+    nicho: universitarios
+    pillar: tecnica_densa
+    angulo_propuesto: "La estequiometría bloquea el 60% de los temas de química general, pero el problema casi siempre está en proporciones y conversión de unidades — temas de grado 9."
+    conexion_metodo: "Cerrar ese prerequisito específico es más eficiente que repetir todo el curso — ese es el método Sapiens."
+    formato_sugerido: carrusel
+
+  - id: "uni-estadistica-prerequisitos"
+    tema: "Por qué Estadística I parece más difícil de lo que es"
+    nicho: universitarios
+    pillar: tecnica_densa
+    angulo_propuesto: "La mayoría de los bloqueos en Estadística I son de probabilidad básica y notación matemática — no del contenido estadístico en sí. Cómo diagnosticarlo."
+    conexion_metodo: "El diagnóstico de prerequisitos Sapiens mapea esto antes del primer parcial del semestre."
+    formato_sugerido: carrusel
+
+  - id: "uni-fisica-newton"
+    tema: "Por qué Newton falla antes de matemáticas en física"
+    nicho: universitarios
+    pillar: tecnica_densa
+    angulo_propuesto: "La física newtoniana requiere un modelo mental de vectores y sistemas de referencia — no solo cálculo. Cuál es el prerequisito conceptual que más falla."
+    conexion_metodo: "Diagnosticar si el bloqueo es conceptual o matemático es el primer paso del proceso Sapiens."
+    formato_sugerido: carrusel
+
+  - id: "uni-como-leer-paper"
+    tema: "Cómo leer un paper académico en 20 minutos"
+    nicho: universitarios
+    pillar: tecnica_densa
+    angulo_propuesto: "El orden correcto para leer un artículo científico: no empieces por la introducción. El método de ingeniería inversa para extraer el argumento central en tiempo récord."
+    conexion_metodo: "Esta es una habilidad de método de estudio avanzada que Sapiens enseña como parte de la ruta universitaria."
+    formato_sugerido: carrusel

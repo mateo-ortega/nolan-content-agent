@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>sapiens · Comparative</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:#111;}
+  .slide{width:1080px;height:1350px;background:#FAFAF7;color:#1A1C23;position:relative;padding:96px 80px;box-sizing:border-box;display:flex;flex-direction:column;gap:48px;}
+  .top{display:flex;align-items:center;justify-content:space-between;}
+  .tag{font-family:'Jura',sans-serif;font-weight:600;font-size:22px;letter-spacing:0.14em;text-transform:uppercase;color:#6B6B6B;}
+  .title{font-family:'Outfit',sans-serif;font-weight:700;font-size:72px;line-height:1;letter-spacing:-0.02em;color:#1A1C23;}
+  .title .teal{color:#2B9E8F;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:32px;flex:1;}
+  .col{border-radius:24px;padding:48px 40px;display:flex;flex-direction:column;gap:24px;}
+  .col.old{background:#F5F0EB;border:1px solid #E0DCD6;}
+  .col.new{background:#1A1C23;color:#FAFAF7;}
+  .col.new .h{color:#3DBDAD;}
+  .h{font-family:'Jura',sans-serif;font-weight:700;font-size:22px;letter-spacing:0.14em;text-transform:uppercase;color:#6B6B6B;}
+  .big{font-family:'Outfit',sans-serif;font-weight:700;font-size:52px;line-height:0.98;letter-spacing:-0.02em;}
+  .col.old .big{text-decoration:line-through;text-decoration-color:#E85D5D;text-decoration-thickness:4px;color:#6B6B6B;}
+  .list{display:flex;flex-direction:column;gap:16px;margin-top:auto;}
+  .li{font-family:'Instrument Sans',sans-serif;font-size:22px;line-height:1.4;display:flex;gap:12px;align-items:flex-start;}
+  .li::before{content:"·";font-weight:700;color:#2B9E8F;font-size:28px;line-height:0.8;}
+  .col.new .li::before{color:#F5C542;}
+  .foot{display:flex;align-items:center;justify-content:space-between;}
+  .foot .left{display:flex;align-items:center;gap:16px;}
+  .foot img{height:56px;width:auto;}
+  .idx{font-family:'Geist Mono',monospace;font-size:22px;color:#6B6B6B;letter-spacing:0.08em;}
+  .idx b{color:#E8A838;font-weight:600;}
+</style></head>
+<body>
+<div class="slide">
+  <div class="top">
+    <div><div class="tag" style="margin-bottom:16px;">Comparativa · 03 / 07</div>
+    <div class="title">Clase <span class="teal">estandar</span><br>vs. ruta <span class="teal">propia</span></div></div>
+  </div>
+  <div class="cols">
+    <div class="col old">
+      <div class="h">Modelo antiguo</div>
+      <div class="big">Un ritmo para todos.</div>
+      <div class="list">
+        <div class="li">Temario fijo, semana a semana.</div>
+        <div class="li">Evaluación idéntica para cada estudiante.</div>
+        <div class="li">Éxito = cumplir el promedio.</div>
+      </div>
+    </div>
+    <div class="col new">
+      <div class="h">Con sapiens</div>
+      <div class="big">Un ritmo por persona.</div>
+      <div class="list">
+        <div class="li">La ruta se recalibra tras cada sesión.</div>
+        <div class="li">Evaluación ligera, continua y sin castigo.</div>
+        <div class="li">Éxito = tu próximo paso, a tu medida.</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="left"><img src="../assets/sapiens_icon_teal.svg"><span style="font-family:'Outfit',sans-serif;font-weight:700;font-size:28px;color:#2B9E8F;">sapiens</span></div>
+    <div class="idx"><b>03</b> / 07</div>
+  </div>
+</div>
+</body></html>

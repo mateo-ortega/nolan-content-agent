@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>sapiens · CTA</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:#111;}
+  .slide{width:1080px;height:1350px;background:#1A1C23;color:#FAFAF7;position:relative;padding:96px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;}
+  .slide::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 55% at 20% 85%, rgba(43,158,143,0.35), transparent 65%);}
+  .tag{font-family:'Jura',sans-serif;font-weight:600;font-size:22px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(250,250,247,0.7);z-index:1;}
+  .headline{font-family:'Outfit',sans-serif;font-weight:700;font-size:136px;line-height:0.94;letter-spacing:-0.03em;z-index:1;}
+  .headline .teal{color:#3DBDAD;}
+  .cta{display:inline-flex;align-items:center;gap:14px;background:#F5C542;color:#1A1C23;padding:24px 40px;border-radius:9999px;font-family:'Outfit',sans-serif;font-weight:600;font-size:32px;letter-spacing:-0.01em;align-self:flex-start;z-index:1;margin-top:32px;}
+  .cta .arrow{font-size:28px;}
+  .handle{font-family:'Geist Mono',monospace;font-size:24px;color:rgba(250,250,247,0.75);margin-top:24px;z-index:1;}
+  .foot{display:flex;align-items:center;justify-content:center;z-index:1;}
+  .foot img{height:128px;width:auto;}
+</style></head>
+<body>
+<div class="slide">
+  <div>
+    <div class="tag">Empieza · 07 / 07</div>
+    <div class="headline" style="margin-top:48px;">Tu ruta<br>empieza<br>con una <span class="teal">pregunta</span>.</div>
+  </div>
+  <div>
+    <div class="cta">Escríbenos <span class="arrow">→</span></div>
+    <div class="handle">@sapiens.ed · sapiensby.shift</div>
+  </div>
+  <div class="foot">
+    <img src="../assets/sapiens_logo_compact_white.png" alt="sapiens">
+  </div>
+</div>
+</body></html>

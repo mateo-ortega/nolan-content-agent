@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>sapiens · carousel deck</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:#0F0F12;color:#E8E6E1;font-family:'Instrument Sans',sans-serif;}
+  .wrap{max-width:1240px;margin:0 auto;padding:64px 32px 96px;}
+  h1{font-family:'Outfit',sans-serif;font-weight:700;font-size:48px;letter-spacing:-0.02em;color:#FAFAF7;margin:0 0 8px;}
+  .sub{font-family:'Instrument Sans',sans-serif;font-size:18px;color:#A0A0A0;margin-bottom:48px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:24px;}
+  .card{background:#1A1C22;border-radius:14px;overflow:hidden;border:1px solid #2A2D35;}
+  .frame{width:100%;aspect-ratio:1080/1350;overflow:hidden;position:relative;}
+  .frame iframe{border:0;width:1080px;height:1350px;transform-origin:0 0;}
+  .meta{padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+  .meta .t{font-family:'Outfit',sans-serif;font-weight:600;font-size:14px;color:#E8E6E1;}
+  .meta .n{font-family:'Geist Mono',monospace;font-size:11px;color:#A0A0A0;}
+</style></head>
+<body>
+<div class="wrap">
+  <h1>sapiens · Instagram carousel (1080×1350)</h1>
+  <div class="sub">Seven slide templates for the <span style="font-family:'Geist Mono',monospace;">@sapiens.ed</span> content agent. Light-mode interior; teal/deep for cover + CTA.</div>
+  <div class="grid" id="g"></div>
+</div>
+<script>
+const slides=[
+  ["Cover.html","Cover","01"],["Thesis.html","Thesis","02"],
+  ["Comparative.html","Comparative","03"],["Process.html","Process","04"],
+  ["BigQuote.html","Big Quote","05"],["Stat.html","Stat","06"],["CTA.html","CTA","07"]
+];
+const g=document.getElementById('g');
+for(const [f,t,n] of slides){
+  const card=document.createElement('div');card.className='card';
+  card.innerHTML=`<div class="frame"><iframe src="${f}" scrolling="no"></iframe></div><div class="meta"><span class="t">${t}</span><span class="n">${n}/07</span></div>`;
+  g.appendChild(card);
+}
+function fit(){
+  document.querySelectorAll('.frame').forEach(fr=>{
+    const w=fr.clientWidth;const s=w/1080;
+    fr.querySelector('iframe').style.transform=`scale(${s})`;
+    fr.style.height=(1350*s)+'px';
+  });
+}
+addEventListener('load',fit);addEventListener('resize',fit);
+</script>
+</body></html>
