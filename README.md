@@ -1,5 +1,7 @@
 # Nolan — Agente de contenido Sapiens
 
+**Repositorio oficial:** https://github.com/mateo-ortega/nolan-content-agent
+
 **Fuente de verdad** del agente de IA autónomo que produce contenido para Instagram `@sapiens.ed` bajo la identidad Sapiens by Shift.
 
 Este directorio es el **source tree**. Se despliega al VPS Hostinger como `/srv/sapiens-nolan/` y puebla `~/.hermes/` del usuario de servicio.
