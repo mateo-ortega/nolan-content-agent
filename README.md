@@ -4,7 +4,7 @@
 
 **Fuente de verdad** del agente de IA autónomo que produce contenido para Instagram `@sapiens.ed` bajo la identidad Sapiens by Shift.
 
-**Míralo en producción:** [@sapiens.ed en Instagram](https://www.instagram.com/sapiens.ed/) — todo el contenido de esa cuenta (carruseles, animaciones, reels) lo produce este agente, sin edición humana previa a la revisión de aprobación.
+**Míralo en producción:** [@sapiens.ed en Instagram](https://www.instagram.com/sapiens.ed/) todo el contenido de esa cuenta (carruseles, animaciones, reels) lo produce este agente, sin edición humana previa a la revisión de aprobación.
 
 > Este repositorio es público y sirve como referencia de arquitectura. Los datos de negocio reales (pricing, competencia, playbook de copy exacto, credenciales, infraestructura) están reemplazados por placeholders y ejemplos genéricos — ver [Cómo adaptarlo a tu marca](#cómo-adaptarlo-a-tu-marca).
 
