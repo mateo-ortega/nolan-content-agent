@@ -128,15 +128,7 @@ Los tres cambios mínimos para adaptarlo:
 └── logs/                      ← agent.log, llm_usage.jsonl (gitignored)
 ```
 
-## Status
 
-- [x] Fase 0 — brand docs, Hermes validado, scaffold local
-- [x] Fase 1 — provisioning VPS + Hermes `hello-world`
-- [x] Fase 2 — porteo skills + smoke (carrusel PNG + Manim MP4)
-- [x] Fase 3 — skills Nolan + router LLM + Gateway Telegram + rclone
-- [x] Fase 4 — dry-run end-to-end
-- [x] Fase 5 — go-live (@sapiens.ed publica desde el pipeline de este agente)
-- [ ] Fase 6 — learning loop reforzado (positivo + negativo) + escalado
 
 Ver `docs/infra-estado-2026-06-06.md` para el detalle operativo actual.
 
