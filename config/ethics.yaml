@@ -45,13 +45,11 @@ red:
     description: "Desprestigio nominal de competencia"
     # Lista de marcas vetadas (ampliable). Solo dispara si aparecen junto a
     # lenguaje despectivo; el match simple del nombre se maneja en review humano.
+    # EJEMPLO — reemplaza por los nombres reales de tu competencia:
     competitor_names:
-      - "milton ochoa"
-      - "kumon"
-      - "preuniversitario"
-      - "platzi"
-      - "coderhouse"
-      - "soy henry"
+      - "competidor ejemplo 1"
+      - "competidor ejemplo 2"
+      - "competidor ejemplo 3"
     attack_keywords:
       - "malo"
       - "basura"

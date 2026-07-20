@@ -70,7 +70,7 @@ L2 (adultos_ia, pymes, cruzado) es 25% del calendario pero su audiencia natural 
 
 ### 2.2 — `nolan-blog` (repurposing SEO)
 
-- **Qué hace:** convierte carruseles aprobados con `engagement_rate > p75` a blog posts long-form (1500-2500 palabras) en `sapiens-landing/`. Sigue el formato Bilbao/Platzi: tesis + evidencia + implicación práctica. Incluye CTA al servicio de tutoría.
+- **Qué hace:** convierte carruseles aprobados con `engagement_rate > p75` a blog posts long-form (1500-2500 palabras) en `sapiens-landing/`. Sigue el formato Creador Ejemplo A/B: tesis + evidencia + implicación práctica. Incluye CTA al servicio de tutoría.
 - **Por qué importa:** SEO orgánico = tráfico recurrente sin pagar Meta Ads. Cada blog post indexable es un activo de largo plazo. Bonus: pixel de Meta Ads en sapiens-landing → audiencia de remarketing.
 - **Implementación:**
   - Nueva skill: `skills/nolan-blog/scripts/repurpose_to_blog.py`
@@ -88,7 +88,7 @@ El research actual es reactivo (RSS, Trends, Perplexity de últimos 7 días). No
 
 ### 3.1 — `nolan-viral-detector`
 
-- **Qué hace:** scrape diario de polar stars (Bilbao, 30x, Platzi, Freddy Vega, Soy Henry, Coderhouse, freeCodeCamp, MagicSchool) vía Apify `apify/instagram-profile-scraper`. Identifica posts con `engagement > 3× mediana_30d` en últimos 7 días. DeepSeek extrae el **ángulo** (no copia contenido). Notifica a Mateo: "Bilbao tuvo viral X (40k likes vs 12k mediana). Ángulo replicable: Y. ¿Produzco?".
+- **Qué hace:** scrape diario de polar stars (Creador Ejemplo A-F (ver config/benchmarks.yaml)) vía Apify `apify/instagram-profile-scraper`. Identifica posts con `engagement > 3× mediana_30d` en últimos 7 días. DeepSeek extrae el **ángulo** (no copia contenido). Notifica a Mateo: "Creador Ejemplo A tuvo viral X (40k likes vs 12k mediana). Ángulo replicable: Y. ¿Produzco?".
 - **Por qué importa:** los polar stars ya validaron qué resuena con audiencia educativa CO/LatAm. Replicar sus ángulos (no contenido) es atajo legítimo.
 - **Implementación:**
   - Nueva skill: `skills/nolan-viral-detector/scripts/detect_virals.py`
@@ -106,7 +106,7 @@ El research actual es reactivo (RSS, Trends, Perplexity de últimos 7 días). No
   3. DeepSeek filtra candidatos: idioma español, región CO/LatAm, nicho (educación / IA aplicada / método de estudio), alineación tonal con SOUL
   4. Notifica a Mateo: "Encontré `@cuenta-X` (50k seguidores, 3 posts virales últimos 30 días, ángulo: Y, alineación SOUL: alta). ¿Agregar a benchmarks?"
   5. Aprobación → script auto-edita `config/sources.yaml.apify.instagram_profile_scraper.benchmark_handles` y hace commit con mensaje `feat(sources): add @cuenta-X to benchmark handles`
-- **Por qué importa:** los benchmarks actuales son referencias globales (Bilbao, MagicSchool). Para tono colombiano/latam de educación, faltan voces locales. Discovery automatizado encuentra esas voces antes de que Mateo las descubra a mano.
+- **Por qué importa:** los benchmarks actuales son referencias globales (Creador Ejemplo A, Creador Ejemplo F). Para tono colombiano/latam de educación, faltan voces locales. Discovery automatizado encuentra esas voces antes de que Mateo las descubra a mano.
 - **Implementación:**
   - Extensión de `nolan-viral-detector` (mismo skill o sub-script)
   - Apify actor `apify/instagram-profile-scraper` con `relatedProfiles: true`

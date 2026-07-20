@@ -175,7 +175,7 @@ def build():
         ["CTAs guiones (Cambio D ✓ 2026-05-16)",
          "'Comenta [palabra] y te envío el caso completo por DM.' Palabra = 1 término del tema, ≤2 sílabas."],
         ["CTAs carruseles",
-         "Intocables. Ya alineados al GTM v2 ('sapienseducation.com', diagnóstico $250K)."],
+         "Intocables. Ya alineados al GTM v2 ('sapienseducation.com', diagnóstico $<PRECIO_SETUP>)."],
         ["Stats con fuente (Cambio C — pendiente S3)",
          "Ninguna cifra numérica sin URL/paper en sources.md. Validador con retry 3x antes de escribir archivos."],
         ["'Mateo aplica el método'",

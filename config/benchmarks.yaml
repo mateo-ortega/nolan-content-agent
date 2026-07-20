@@ -3,24 +3,28 @@
 #
 # Cada polar star tiene: por qué la seguimos, qué tomamos, qué NO tomamos,
 # y un ejemplo de pieza que encapsula su enfoque.
+#
+# NOTA: los nombres/handles de abajo son EJEMPLOS genéricos. En producción,
+# reemplázalos por las cuentas reales que sirven de referencia editorial
+# para tu marca (no se versionan en este repo público).
 
 polar_stars:
-  bilbao_30x:
-    name: "Andrés Bilbao / 30x"
-    handle_ig: "@andres.bilbao"
+  creador_ejemplo_a:
+    name: "Creador Ejemplo A (founder/autoridad)"
+    handle_ig: "@creador_ejemplo_a"
     what_we_take:
       - "Estructura 'tesis corta + evidencia + implicación práctica'"
       - "Autoridad desde experiencia, no desde títulos"
       - "Cierre que empuja a acción concreta, no a like"
     what_we_leave:
       - "Tono empresarial / startupero"
-      - "Referencias a finanzas que no aplican a educación"
+      - "Referencias que no aplican a tu nicho"
     pair_with_niches: [adultos_ia, pymes, jovenes_preicfes]
     format_fit: [carrusel, voiceover_broll]
 
-  platzi_freddy:
-    name: "Platzi / Freddy Vega"
-    handle_ig: "@freddyveganet"
+  creador_ejemplo_b:
+    name: "Creador Ejemplo B (edtech sobrio)"
+    handle_ig: "@creador_ejemplo_b"
     what_we_take:
       - "Análisis sobrio de tecnología sin hype"
       - "Credibilidad técnica cuando el tema lo amerita"
@@ -31,21 +35,21 @@ polar_stars:
     pair_with_niches: [adultos_ia, jovenes_preicfes]
     format_fit: [talking_head, voiceover_broll]
 
-  soy_henry:
-    name: "Soy Henry"
-    handle_ig: "@soyhenry"
+  creador_ejemplo_c:
+    name: "Creador Ejemplo C (testimoniales)"
+    handle_ig: "@creador_ejemplo_c"
     what_we_take:
-      - "Testimoniales concretos — estudiante real cuenta su proceso"
+      - "Testimoniales concretos — usuario real cuenta su proceso"
       - "Arcos narrativos: de frustración a logro con método"
     what_we_leave:
-      - "Vibra bootcamp / mismo molde repetido"
+      - "Vibra de molde repetido"
       - "Cherry picking de éxitos excepcionales"
     pair_with_niches: [jovenes_preicfes, padres]
     format_fit: [voiceover_broll, talking_head]
 
-  coderhouse:
-    name: "Coderhouse"
-    handle_ig: "@coderhouse"
+  creador_ejemplo_d:
+    name: "Creador Ejemplo D (engagement interactivo)"
+    handle_ig: "@creador_ejemplo_d"
     what_we_take:
       - "Ganchos interactivos — preguntas, comparativas, 'cuál es tu caso'"
       - "Engagement-oriented cuando sirve al contenido"
@@ -54,9 +58,9 @@ polar_stars:
     pair_with_niches: [todos]
     format_fit: [carrusel]
 
-  freecodecamp:
-    name: "freeCodeCamp"
-    handle_ig: "@freecodecamp"
+  creador_ejemplo_e:
+    name: "Creador Ejemplo E (valor técnico puro)"
+    handle_ig: "@creador_ejemplo_e"
     what_we_take:
       - "Mínimo 30% de cada pieza es valor técnico puro y reutilizable"
       - "Respeto por el tiempo del lector — sin relleno"
@@ -69,11 +73,11 @@ polar_stars:
       name: "30% valor técnico puro"
       description: "Cada pieza debe incluir al menos un bloque (slide, segmento, párrafo) que enseñe algo útil aunque el lector no compre nada."
 
-  magicschool:
-    name: "MagicSchool AI"
-    handle_ig: "@magicschoolai"
+  creador_ejemplo_f:
+    name: "Creador Ejemplo F (show-don't-tell + IA)"
+    handle_ig: "@creador_ejemplo_f"
     what_we_take:
-      - "Show-don't-tell aplicado a IA + educación"
+      - "Show-don't-tell aplicado a IA + tu vertical"
       - "Caso de uso concreto con screenshot/resultado visible"
       - "Demuestra el valor antes de nombrar el producto"
     what_we_leave:
@@ -91,16 +95,15 @@ polar_stars:
 # - caption length
 # - usa hashtags / menciona otro handle
 # Las señales van a trends.sqlite.signals_ig
+#
+# EJEMPLO — reemplaza por los handles reales que quieras monitorear:
 benchmark_accounts_ig:
-  - andres.bilbao
-  - 30x
-  - platzi
-  - freddyveganet
-  - soyhenry
-  - coderhouse
-  - freecodecamp
-  - magicschoolai
-  -investigar cuentas edtech que puedan funcionar con el perfil de Sapiens.
+  - creador_ejemplo_a
+  - creador_ejemplo_b
+  - creador_ejemplo_c
+  - creador_ejemplo_d
+  - creador_ejemplo_e
+  - creador_ejemplo_f
 
 # =============================================================================
 # Anti-patterns (qué NO hacer, con ejemplos abstractos)

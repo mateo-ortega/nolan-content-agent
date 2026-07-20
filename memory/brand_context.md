@@ -16,7 +16,7 @@
 
 ## 2. Producto v2 y audiencias (vigente desde 2026-04-25)
 
-**Producto único: Ruta Sapiens** — $250K COP setup fee (diagnóstico + Documento de Ruta) + $300K COP/mes (plataforma + tutor 1:1 + reporte mensual). Mínimo 3 meses.
+**Producto único: Ruta Sapiens** — $<PRECIO_SETUP> COP setup fee (diagnóstico + Documento de Ruta) + $<PRECIO_MENSUAL> COP/mes (plataforma + tutor 1:1 + reporte mensual). Mínimo 3 meses.
 
 ICFES, Excelencia Académica, IA para adultos y Homeschooling son **rutas pre-configuradas** del producto core, no productos independientes.
 
@@ -48,14 +48,14 @@ Calibración por nicho:
 
 **Palabras prohibidas**: revolucionario, mágico, garantizado, definitivo, secreto, truco, insane, brutal, hack, 100% efectivo, game-changer, disruptivo, increíble, compañero de viaje, viaje de aprendizaje.
 
-**Frases a evitar**: "aprende a tu medida" (tagline deprecado), "somos tu compañero de aprendizaje", "el método definitivo", "primera sesión gratis" (el diagnóstico ahora cuesta $250K).
+**Frases a evitar**: "aprende a tu medida" (tagline deprecado), "somos tu compañero de aprendizaje", "el método definitivo", "primera sesión gratis" (el diagnóstico ahora cuesta $<PRECIO_SETUP>).
 
 ## 4. Prohibiciones duras (SOUL-red — bloquean publicación)
 
 1. **Promesas absolutas de resultado** ("con esto sacás 400 en ICFES garantizado").
 2. **FOMO tóxico / miedo a reemplazo** ("si no aprendés esto te quedás atrás").
 3. **Dinero fácil / atajos mágicos** ("aprendé esto sin esfuerzo").
-4. **Desprestigio de competencia por nombre propio** (Milton Ochoa, Kumon, Platzi — se puede analizar práctica genérica sin nombrar marca).
+4. **Desprestigio de competencia por nombre propio** (ej: "Competidor Ejemplo" — se puede analizar práctica genérica sin nombrar marca).
 5. **Afirmaciones sin fuente en temas técnicos/científicos** — citar fuente o reformular a "en nuestra experiencia".
 6. **Política partidista o religión** en piezas de marca.
 7. **Posicionar la IA como el héroe del mensaje** — la IA es herramienta del método. El héroe es el diagnóstico personalizado + tutor humano.
@@ -74,11 +74,11 @@ Regla amarilla (reformular una vez): hype sin fuente, tono peer-to-peer excesivo
 
 ## 6. Polar stars editoriales (cómo construimos autoridad)
 
-- **Andrés Bilbao / 30x**: tesis corta + evidencia + implicación práctica. Autoridad desde experiencia, no desde títulos.
-- **Platzi / Freddy Vega**: análisis sobrio de tecnología sin hype. Transparencia sobre limitaciones.
-- **Soy Henry**: testimoniales concretos con arco narrativo "frustración → método → logro". Sin cherry-picking de milagros.
-- **freeCodeCamp**: **regla dura — ≥30% de cada pieza es valor técnico puro**, útil aunque el lector no compre nada.
-- **MagicSchool AI**: show-don't-tell para IA+educación. Caso de uso antes de nombrar el producto.
+- **Creador Ejemplo A**: tesis corta + evidencia + implicación práctica. Autoridad desde experiencia, no desde títulos.
+- **Creador Ejemplo B**: análisis sobrio de tecnología sin hype. Transparencia sobre limitaciones.
+- **Creador Ejemplo C**: testimoniales concretos con arco narrativo "frustración → método → logro". Sin cherry-picking de milagros.
+- **Creador Ejemplo E**: **regla dura — ≥30% de cada pieza es valor técnico puro**, útil aunque el lector no compre nada.
+- **Creador Ejemplo F**: show-don't-tell para IA+educación. Caso de uso antes de nombrar el producto.
 
 ## 7. Anti-patterns a evitar
 
@@ -87,7 +87,7 @@ Regla amarilla (reformular una vez): hype sin fuente, tono peer-to-peer excesivo
 - `ai_replacement_fear`: vender IA/educación asustando con reemplazo laboral.
 - `parent_guilt`: culpabilizar al padre por no saber ayudarle al hijo.
 - `peer_to_peer_slip`: Mateo hablando como "compañero" en vez de como experto que diagnostica.
-- `free_diagnostic_mention`: mencionar "diagnóstico gratis" — el diagnóstico cuesta $250K y entrega un documento tangible.
+- `free_diagnostic_mention`: mencionar "diagnóstico gratis" — el diagnóstico cuesta $<PRECIO_SETUP> y entrega un documento tangible.
 
 ## 8. Cadencia y rol del agente (Nolan)
 

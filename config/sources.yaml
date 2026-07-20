@@ -13,35 +13,36 @@ apify:
     actor_id: "apify/instagram-profile-scraper"
     cadence_hours: 48
     max_posts_per_run: 20
+    # EJEMPLO — reemplaza por los handles reales que quieras monitorear.
+    # No se versionan handles reales en este repo público.
     benchmark_handles:
-      # ── Autoridad / edtech LATAM ─────────────────────────────────────────
-      - "andres.bilbao"        # Rappi founder — autoridad emprendimiento
-      - "30x"                   # 30x brand — autoridad
-      - "platzi"                # edtech referente LATAM
-      - "freddyveganet"         # Freddy Vega — fundador Platzi
-      - "soyhenry"              # Soy Henry — bootcamp
-      - "coderhouse"            # Coderhouse — bootcamp
-      - "freecodecamp"          # freeCodeCamp — valor técnico
-      - "magicschoolai"         # MagicSchool AI — IA+edu show-don't-tell
-      # ── Educación CO — nicho padres/preicfes ────────────────────────────
-      - "preicfes.oficial"      # pre-ICFES Colombia — mismo nicho directo
-      - "rutasaber"             # Ruta Saber — prep ICFES CO
-      - "academico.co"          # Académico CO — refuerzo escolar
-      # ── Ciencia del aprendizaje — feed tecnica_densa ────────────────────
-      - "aliabdaal"             # Ali Abdaal — productividad + ciencia del aprendizaje
-      - "andrewhuberman"        # Andrew Huberman — neurociencia (memoria, foco)
-      - "khanacademy"           # Khan Academy — pedagogía basada en evidencia
+      # ── Autoridad / edtech (ejemplo) ─────────────────────────────────────
+      - "creador_ejemplo_founder"    # autoridad de founder / emprendimiento
+      - "creador_ejemplo_marca"      # marca de referencia en tu vertical
+      - "creador_ejemplo_edtech"     # edtech referente en tu región
+      - "creador_ejemplo_bootcamp"   # bootcamp / formación técnica
+      - "creador_ejemplo_valor_tecnico" # valor técnico puro
+      - "creador_ejemplo_ia_edu"     # IA aplicada a educación, show-don't-tell
+      # ── Nicho local (ejemplo) ────────────────────────────────────────────
+      - "cuenta_ejemplo_nicho_1"     # misma vertical/nicho directo
+      - "cuenta_ejemplo_nicho_2"     # preparación / refuerzo en tu vertical
+      - "cuenta_ejemplo_nicho_3"     # refuerzo escolar / adyacente
+      # ── Ciencia del aprendizaje (ejemplo) ────────────────────────────────
+      - "cuenta_ejemplo_productividad"  # productividad + ciencia del aprendizaje
+      - "cuenta_ejemplo_neurociencia"   # neurociencia (memoria, foco)
+      - "cuenta_ejemplo_pedagogia"      # pedagogía basada en evidencia
 
   tiktok_profile_scraper:
     actor_id: "clockworks/tiktok-profile-scraper"
     cadence_hours: 72
     max_videos_per_run: 15
+    # EJEMPLO — mismo criterio que arriba, reemplaza por tus handles reales.
     benchmark_handles:
-      - "platzi"
-      - "30xbrand"
-      - "magicschoolai"
-      - "aliabdaal"             # Ali Abdaal — aprendizaje + productividad
-      - "andrewhuberman"        # Huberman Lab — neurociencia del aprendizaje
+      - "creador_ejemplo_edtech"
+      - "creador_ejemplo_marca"
+      - "creador_ejemplo_ia_edu"
+      - "cuenta_ejemplo_productividad"
+      - "cuenta_ejemplo_neurociencia"
 
   # Presupuesto Apify (tracked separado)
   budget_usd_per_month_cap: 10

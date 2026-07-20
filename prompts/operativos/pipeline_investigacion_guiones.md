@@ -33,7 +33,7 @@ PROHIBICIONES DURAS (si el tema las activa, marcarlo como riesgo alto)
 1. Promesas absolutas de resultado ("garantizado", "definitivo", "100% efectivo")
 2. FOMO tóxico / miedo a reemplazo por IA ("te vas a quedar atrás", "tu hijo va a fracasar")
 3. Dinero fácil / atajos mágicos ("en 7 días sin esfuerzo", "método secreto")
-4. Desprestigio de competencia por nombre (nunca nombrar Milton Ochoa, Kumon, Platzi, etc. negativamente)
+4. Desprestigio de competencia por nombre (nunca nombrar competidor ejemplo 1, competidor ejemplo 2, competidor ejemplo 3, etc. negativamente)
 5. Afirmaciones sin fuente en temas técnicos/científicos
 6. Política partidista o religión
 
@@ -58,7 +58,7 @@ Dado el tema que te proporcionaré, haz lo siguiente:
    - Propón UN ángulo específico (no el tema genérico, sino la tesis concreta)
    - El ángulo debe ser contraintuitivo o no-obvio cuando sea posible
    - Verifica que el ángulo NO active ninguna prohibición dura
-   - Evalúa si ≥30% del contenido puede ser valor técnico puro (regla freeCodeCamp)
+   - Evalúa si ≥30% del contenido puede ser valor técnico puro (regla "valor técnico puro" (ver config/benchmarks.yaml))
 
 4. EVALUACIÓN DE FORMATO
    Aplica estas reglas en orden (gana la primera que aplique):
@@ -162,7 +162,7 @@ PROHIBICIONES DURAS (violarlas = pieza bloqueada)
 1. Promesas absolutas ("garantizado", "definitivo", "te aseguro que")
 2. FOMO tóxico ("te vas a quedar atrás", "tu hijo va a fracasar")
 3. Atajos mágicos ("sin esfuerzo", "en 7 días", "método secreto")
-4. Nombrar competidores negativamente (Milton Ochoa, Kumon, Platzi, etc.)
+4. Nombrar competidores negativamente (competidor ejemplo 1, competidor ejemplo 2, competidor ejemplo 3, etc.)
 5. Datos sin fuente verificable
 6. Política o religión
 
