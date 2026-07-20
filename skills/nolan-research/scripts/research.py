@@ -32,15 +32,16 @@ PROJECT_ROOT = Path(os.environ.get(
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from sapiens.nolan_llm_router import load_router   # noqa: E402
+from sapiens._paths import pieces_db_path           # noqa: E402
 
 SOURCES_CFG      = PROJECT_ROOT / "config" / "sources.yaml"
 SCHEMA_SQL       = PROJECT_ROOT / "memory" / "schemas" / "trends.sql"
 DB_PATH          = PROJECT_ROOT / "memory" / "trends.sqlite"
 LOG_PATH         = PROJECT_ROOT / "logs" / "research.log"
 EVERGREEN_PATH   = PROJECT_ROOT / "prompts" / "evergreen_topics.yaml"
-PIECES_DB_PATH   = PROJECT_ROOT / "memory" / "pieces.sqlite"
+PIECES_DB_PATH   = pieces_db_path()
 
-ALL_NICHOS = ["jovenes_preicfes", "padres", "universitarios", "adultos_ia"]
+ALL_NICHOS = ["jovenes_preicfes", "padres", "universitarios", "adultos_ia", "pymes"]
 
 _CLASSIFY_SYSTEM = """Eres el analizador de senales de contenido de Nolan, agente de @sapiens.ed (Sapiens by Shift, Colombia).
 
@@ -97,6 +98,7 @@ def main():
 
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     _log(f"[research] ciclo={ciclo_ts}  trigger={args.trigger}  nichos={nichos}  dry_run={args.dry_run}")
+    _startup_health_check()
 
     # 1. Cargar config
     with open(SOURCES_CFG, encoding="utf-8") as f:
@@ -141,6 +143,7 @@ def main():
         _write_signals(db, new_signals, ciclo_ts)
         _write_clusters(db, shortlist, ciclo_ts)
         _write_cycle(db, ciclo_ts, args.trigger, nichos, raw, new_signals, shortlist, llm_cost)
+        _check_research_degraded(db)
 
     # 7. Salida
     result = {
@@ -688,11 +691,127 @@ def _write_cycle(db, ciclo_ts, trigger, nichos, raw, new_signals, shortlist, cos
         _log(f"[research] WARN escribiendo ciclo: {e}")
 
 
+def _startup_health_check() -> None:
+    """Loguea presencia de API keys criticas y alerta a Telegram si faltan."""
+    checks = {
+        "TAVILY_API_KEY":     bool(os.environ.get("TAVILY_API_KEY")),
+        "PERPLEXITY_API_KEY": bool(os.environ.get("PERPLEXITY_API_KEY")),
+        "APIFY_TOKEN":        bool(os.environ.get("APIFY_TOKEN")),
+    }
+    summary = " ".join(f"{k}={'OK' if v else 'MISSING'}" for k, v in checks.items())
+    _log(f"[research] startup api_keys: {summary}")
+
+    if not checks["TAVILY_API_KEY"] and not checks["PERPLEXITY_API_KEY"]:
+        _log("[research] WARN: sin TAVILY ni PERPLEXITY — solo DuckDuckGo (fallback)")
+        _notify_telegram(
+            "Nolan WARN: research sin TAVILY ni PERPLEXITY. Solo DuckDuckGo "
+            "como fallback (calidad degradada)."
+        )
+
+
+def _check_research_degraded(db: sqlite3.Connection) -> None:
+    """Alerta si shortlist_count < 3 por 5 ciclos seguidos."""
+    try:
+        rows = db.execute(
+            "SELECT shortlist_count FROM research_cycles "
+            "ORDER BY ciclo_ts DESC LIMIT 5"
+        ).fetchall()
+        if len(rows) >= 5 and all((r[0] or 0) < 3 for r in rows):
+            _log("[research] ALERT: 5 ciclos consecutivos con shortlist < 3")
+            _notify_telegram(
+                "Nolan ALERT: research degradado. 5 ciclos seguidos con < 3 "
+                "temas en shortlist. Sistema vive del evergreen — revisar APIs."
+            )
+    except Exception as e:
+        _log(f"[research] WARN degraded check: {e}")
+
+
+def _notify_telegram(text: str) -> None:
+    token = os.environ.get("HERMES_TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat  = os.environ.get("TELEGRAM_ALLOWED_USERS", "").split(",")[0].strip()
+    if not (token and chat):
+        return
+    try:
+        httpx.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat, "text": text},
+            timeout=15,
+        )
+    except Exception:
+        pass
+
+
+def _reangle_evergreen(t: dict, evergreen_id: str) -> tuple[str, str] | None:
+    """
+    Genera un nuevo angulo + hook para un tema evergreen que ya se uso antes.
+
+    Carga los hooks de las ultimas 3 piezas con el mismo evergreen_id y los pasa
+    al LLM como negative examples para forzar diferenciacion. Si la DB no existe
+    o no hay angulos previos, devuelve None (se usa angulo_propuesto original).
+
+    Costo: ~$0.005/llamada (modelo cheap via router task 'strategy.reangle_evergreen').
+    """
+    if not PIECES_DB_PATH.exists():
+        return None
+    try:
+        with sqlite3.connect(PIECES_DB_PATH) as pc:
+            rows = pc.execute(
+                "SELECT hook FROM pieces "
+                "WHERE evergreen_id = ? AND hook IS NOT NULL AND hook != '' "
+                "ORDER BY created_at DESC LIMIT 3",
+                (evergreen_id,),
+            ).fetchall()
+        prev_angles = [r[0] for r in rows if r[0]]
+    except Exception as e:
+        _log(f"[research] WARN reangle query: {e}")
+        return None
+
+    if not prev_angles:
+        return None
+
+    try:
+        router = load_router()
+        prompt = (
+            "Re-angula este tema evergreen para Sapiens (academia IA, audiencia "
+            f"{t.get('nicho','')}).\n"
+            f"Tema: {t.get('tema','')}\n"
+            f"Conexion metodo: {t.get('conexion_metodo','')}\n"
+            f"Angulo original: {t.get('angulo_propuesto','')}\n\n"
+            "Angulos PREVIOS ya publicados (NO repetir, busca uno distinto):\n"
+            + "\n".join(f"- {a}" for a in prev_angles)
+            + "\n\nDevuelve SOLO JSON valido:\n"
+              '{"angulo": "nuevo angulo distinto, 1 frase", "hook": "hook breve para opening"}'
+        )
+        resp = router.call(
+            task="strategy.reangle_evergreen",
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = resp.text.strip()
+        if text.startswith("```"):
+            text = "\n".join(text.splitlines()[1:]).rstrip("`").strip()
+        data = json.loads(text)
+        new_angle = (data.get("angulo") or "").strip()
+        new_hook  = (data.get("hook") or "").strip()
+        if new_angle:
+            _log(f"[research] reangle evergreen={evergreen_id}: '{new_angle[:80]}'")
+            return (new_angle, new_hook)
+    except Exception as e:
+        _log(f"[research] WARN reangle LLM: {e}")
+    return None
+
+
 def _fill_from_evergreen(shortlist: list[dict], nichos: list[str]) -> list[dict]:
     """
     Completa el shortlist con temas evergreen curados si hay < 3 temas.
-    Excluye temas usados en piezas producidas en los últimos 14 días.
-    Marca cada tema añadido con source='evergreen'.
+
+    Cambios respecto a la version original (anti-repeticion P0.5):
+      - Filtra por evergreen_id (no por topic textual) — la columna `topic` en
+        `pieces` viene del tema, no del id evergreen.
+      - Ordena por antiguedad de ultimo uso (`freshness_score`) con random
+        tie-break — rompe el orden estable del YAML que servia siempre el #1.
+      - Cooldown configurable via NOLAN_EVERGREEN_COOLDOWN_DAYS (default 14).
+      - Marca cada tema añadido con `evergreen_id` para que dedup downstream
+        pueda hacer match exacto.
     """
     if not EVERGREEN_PATH.exists():
         _log("[research] WARN: evergreen_topics.yaml no encontrado, saltando floor")
@@ -706,43 +825,77 @@ def _fill_from_evergreen(shortlist: list[dict], nichos: list[str]) -> list[dict]
         _log(f"[research] WARN cargando evergreen_topics.yaml: {e}")
         return []
 
-    # IDs de temas usados recientemente en pieces.sqlite
-    used_ids: set[str] = set()
+    cooldown_days = int(os.environ.get("NOLAN_EVERGREEN_COOLDOWN_DAYS", "14"))
+
+    # Ultimo uso por evergreen_id desde pieces.sqlite
+    last_used: dict[str, str] = {}
+    used_ev_ids: set[str] = set()
     if PIECES_DB_PATH.exists():
         try:
-            pc = sqlite3.connect(PIECES_DB_PATH)
-            rows = pc.execute(
-                "SELECT topic FROM pieces WHERE created_at >= date('now', '-14 days')"
-            ).fetchall()
-            pc.close()
-            used_ids = {r[0] for r in rows if r[0]}
+            with sqlite3.connect(PIECES_DB_PATH) as pc:
+                for eid, last in pc.execute(
+                    "SELECT evergreen_id, MAX(created_at) FROM pieces "
+                    "WHERE evergreen_id IS NOT NULL AND evergreen_id != '' "
+                    "GROUP BY evergreen_id"
+                ):
+                    if eid:
+                        last_used[eid] = last
+                cutoff_iso = (
+                    datetime.now(tz=timezone.utc) - timedelta(days=cooldown_days)
+                ).isoformat()
+                used_ev_ids = {
+                    eid for eid, last in last_used.items()
+                    if last and last >= cutoff_iso
+                }
+        except Exception as e:
+            _log(f"[research] WARN evergreen usage query: {e}")
+
+    import random
+
+    def freshness_score(t: dict) -> float:
+        eid = t.get("id", "")
+        if eid not in last_used:
+            return 1_000_000.0 + random.random()  # nunca usado: top
+        try:
+            iso = last_used[eid].replace("Z", "+00:00")
+            dt = datetime.fromisoformat(iso)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return (datetime.now(tz=timezone.utc) - dt).days + random.random()
         except Exception:
-            pass
+            return random.random()
 
-    # IDs ya en el shortlist actual (por tema)
+    ev_topics_sorted = sorted(ev_topics, key=freshness_score, reverse=True)
+
     existing_temas = {s.get("tema", "").lower() for s in shortlist}
-
     needed = 3 - len(shortlist)
     added: list[dict] = []
 
-    for t in ev_topics:
+    for t in ev_topics_sorted:
         if needed <= 0:
             break
-        # Filtrar por nicho activo
         if t.get("nicho") not in nichos:
             continue
-        # Saltar si ya está en el shortlist
         if t.get("tema", "").lower() in existing_temas:
             continue
-        # Saltar si fue usado recientemente (por id o tema)
         ev_id = t.get("id", "")
-        if ev_id in used_ids or t.get("tema", "") in used_ids:
+        if ev_id in used_ev_ids:
             continue
+
+        # Re-angulacion LLM si el tema ya se uso antes (fuera de la ventana
+        # de cooldown pero presente en historial). Evita publicar 2 piezas
+        # con el mismo angulo_propuesto del YAML.
+        angulo = t.get("angulo_propuesto", "")
+        hook   = ""
+        if ev_id in last_used:
+            angulo, hook = _reangle_evergreen(t, ev_id) or (angulo, "")
+
         added.append({
             "tema":              t["tema"],
             "nicho":             t["nicho"],
             "pillar":            t.get("pillar", "tecnica_densa"),
-            "angulo":            t.get("angulo_propuesto", ""),
+            "angulo":            angulo,
+            "hook":              hook or angulo,
             "score":             0.5,
             "formato_sugerido":  t.get("formato_sugerido", "carrusel"),
             "ethics_risk":       "low",
@@ -750,9 +903,16 @@ def _fill_from_evergreen(shortlist: list[dict], nichos: list[str]) -> list[dict]
             "low_confidence":    False,
             "conexion_metodo":   t.get("conexion_metodo", ""),
             "source":            "evergreen",
+            "evergreen_id":      ev_id,
         })
         existing_temas.add(t["tema"].lower())
         needed -= 1
+
+    if needed > 0 and not added:
+        _log(
+            f"[research] WARN: todos los evergreen del nicho usados en ultimos "
+            f"{cooldown_days} dias — shortlist puede quedar vacio"
+        )
 
     return added
 

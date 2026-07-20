@@ -27,6 +27,30 @@ PROJECT_ROOT = Path(os.environ.get(
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from sapiens.nolan_llm_router import load_router   # noqa: E402
+from sapiens.dedup import is_duplicate_topic       # noqa: E402
+
+
+def check_duplicate_topic(topic: str, force: bool = False) -> None:
+    """
+    Aborta con exit 3 si un tema muy similar ya existe en pieces.sqlite.
+
+    Delega a `sapiens.dedup.is_duplicate_topic` (Jaccard sobre tokens y
+    n-gramas con stem espanol). `--force` omite el chequeo.
+    """
+    if force:
+        return
+    is_dup, info = is_duplicate_topic(topic)
+    if is_dup and info:
+        print(
+            f"[decide-format] DUPLICADO DETECTADO "
+            f"(metrica={info['matched_metric']} score={info['matched_score']:.2f})\n"
+            f"  Nuevo topic:     '{topic}'\n"
+            f"  Ya existe:       '{info['topic']}'\n"
+            f"  piece_id:        {info['piece_id']}\n"
+            f"  Si el angulo es distinto, usa --force para omitir este chequeo.",
+            file=sys.stderr,
+        )
+        sys.exit(3)
 
 # ---------------------------------------------------------------------------
 # Señales de formato (regex sobre el topic)
@@ -128,7 +152,12 @@ def main():
     ap.add_argument("--hook", default="", help="Hook candidato (opcional)")
     ap.add_argument("--dry-run", action="store_true",
                     help="No llama al LLM aunque las reglas sean ambiguas")
+    ap.add_argument("--force", action="store_true",
+                    help="Omite el chequeo de duplicados (usar si el angulo es intencionalmente distinto)")
     args = ap.parse_args()
+
+    # ── 0. Chequeo de duplicado en pieces.sqlite ─────────────────────────────
+    check_duplicate_topic(args.topic, force=args.force)
 
     # Intento con reglas
     result = decide_format_by_rules(args.topic)

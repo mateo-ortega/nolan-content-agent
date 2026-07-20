@@ -8,16 +8,20 @@
   .tag{font-family:'Jura',sans-serif;font-weight:600;font-size:22px;letter-spacing:0.14em;text-transform:uppercase;color:#6B6B6B;}
   .title{font-family:'Outfit',sans-serif;font-weight:700;font-size:84px;line-height:0.98;letter-spacing:-0.02em;color:#1A1C23;margin-top:16px;}
   .title .teal{color:#2B9E8F;}
+
+  /* Cada paso = UN solo texto principal grande, sin título-paso + descripción */
   .steps{display:flex;flex-direction:column;gap:24px;}
-  .step{display:grid;grid-template-columns:88px 1fr;gap:32px;align-items:center;background:#fff;border-radius:20px;padding:28px 32px;box-shadow:0 4px 12px rgba(26,28,35,0.06);}
+  .step{display:grid;grid-template-columns:88px 1fr;gap:32px;align-items:center;background:#fff;border-radius:20px;padding:32px;box-shadow:0 4px 12px rgba(26,28,35,0.06);}
   .step .n{font-family:'Outfit',sans-serif;font-weight:700;font-size:72px;line-height:1;color:#E6F5F2;letter-spacing:-0.03em;}
-  .step .body .h{font-family:'Outfit',sans-serif;font-weight:600;font-size:32px;line-height:1.15;color:#1A1C23;letter-spacing:-0.01em;}
-  .step .body .p{font-family:'Instrument Sans',sans-serif;font-size:20px;line-height:1.5;color:#6B6B6B;margin-top:6px;}
+  .step .step-text{font-family:'Outfit',sans-serif;font-weight:700;font-size:38px;line-height:1.15;color:#1A1C23;letter-spacing:-0.015em;}
   .step.active{background:#2B9E8F;color:#fff;box-shadow:0 16px 48px rgba(43,158,143,0.25);}
   .step.active .n{color:rgba(255,255,255,0.35);}
-  .step.active .body .h{color:#fff;}
-  .step.active .body .p{color:rgba(255,255,255,0.85);}
-  .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
+  .step.active .step-text{color:#fff;}
+
+  /* body opcional al pie: legible, con matiz general — no repite los pasos */
+  .body{font-family:'Instrument Sans',sans-serif;font-size:26px;line-height:1.45;color:#1A1C23;opacity:0.78;max-width:840px;margin-top:auto;}
+
+  .foot{display:flex;align-items:center;justify-content:space-between;margin-top:24px;}
   .foot .left{display:flex;align-items:center;gap:16px;}
   .foot img{height:56px;width:auto;}
   .idx{font-family:'Geist Mono',monospace;font-size:22px;color:#6B6B6B;letter-spacing:0.08em;}
@@ -26,14 +30,14 @@
 <body data-cc-id="cc-1" style="cursor: crosshair;">
 <div class="slide">
   <div>
-    <div class="tag">Cómo funciona · 04 / 07</div>
-    <div class="title">Una ruta que <span class="teal">aprende contigo</span>.</div>
+    <div class="tag">cómo funciona · 04 / 07</div>
+    <div class="title">una ruta que <span class="teal">aprende contigo</span>.</div>
   </div>
   <div class="steps">
-    <div class="step"><div class="n">01</div><div class="body"><div class="h">Diagnóstico ligero</div><div class="p" data-cc-id="cc-2" style="">Conversamos y probamos, sin exámenes, sin estrés.</div></div></div>
-    <div class="step active"><div class="n">02</div><div class="body"><div class="h">Ruta personal</div><div class="p">Cada sesión se adapta al tema, ritmo y estilo del estudiante.</div></div></div>
-    <div class="step"><div class="n">03</div><div class="body"><div class="h" data-cc-id="cc-3" style="">Hábito&nbsp;</div><div class="p">Corto, frecuente, curioso. El hábito es más fuerte que la motivación.</div></div></div>
-    <div class="step" data-cc-id="cc-5"><div class="n">04</div><div class="body"><div class="h" data-cc-id="cc-4" style="">Objetivos</div><div class="p">ICFES, UNAL/UdeA, lo que venga — emergen solos del proceso.</div></div></div>
+    <div class="step"><div class="n">01</div><div class="step-text">diagnosticamos sin examen ni estrés.</div></div>
+    <div class="step active"><div class="n">02</div><div class="step-text">cada sesión se recalibra al estudiante.</div></div>
+    <div class="step"><div class="n">03</div><div class="step-text">construimos un hábito corto y frecuente.</div></div>
+    <div class="step"><div class="n">04</div><div class="step-text">los resultados emergen del proceso.</div></div>
   </div>
   <div class="foot">
     <div class="left"><img src="../assets/sapiens_icon_teal.svg"><span style="font-family:'Outfit',sans-serif;font-weight:700;font-size:28px;color:#2B9E8F;">sapiens</span></div>

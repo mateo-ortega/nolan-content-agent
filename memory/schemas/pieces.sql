@@ -37,6 +37,10 @@ CREATE TABLE IF NOT EXISTS pieces (
     slides_count        INTEGER,                   -- solo carrusel
     duration_s          REAL,                      -- animacion | voiceover
 
+    -- Estrategia editorial (dedup + alignment)
+    pillar              TEXT,                      -- tecnica_densa | demostraciones_metodo | filosofia_educativa | testimonios_video
+    evergreen_id        TEXT,                      -- id del item de evergreen_topics.yaml si vino de ahi
+
     -- Drive + revisión
     drive_path          TEXT,                      -- ruta en Drive
     telegram_message_id TEXT,                      -- ID del mensaje de review en Telegram
@@ -61,6 +65,24 @@ CREATE INDEX IF NOT EXISTS idx_pieces_status    ON pieces(status);
 CREATE INDEX IF NOT EXISTS idx_pieces_niche     ON pieces(niche);
 CREATE INDEX IF NOT EXISTS idx_pieces_format    ON pieces(format);
 CREATE INDEX IF NOT EXISTS idx_pieces_produced  ON pieces(produced_at);
+CREATE INDEX IF NOT EXISTS idx_pieces_pillar    ON pieces(pillar);
+CREATE INDEX IF NOT EXISTS idx_pieces_evergreen ON pieces(evergreen_id);
+
+-- =========================================================================
+-- Uso de items evergreen (auxiliar para dedup; util si en el futuro
+-- queremos contar usos sin que haya pieza producida — ej. skip por dup)
+-- =========================================================================
+
+CREATE TABLE IF NOT EXISTS evergreen_usage (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    evergreen_id    TEXT    NOT NULL,
+    piece_id        TEXT,
+    used_at         TEXT    NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+    FOREIGN KEY (piece_id) REFERENCES pieces(piece_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_evergreen_usage_id   ON evergreen_usage(evergreen_id);
+CREATE INDEX IF NOT EXISTS idx_evergreen_usage_when ON evergreen_usage(used_at);
 
 -- =========================================================================
 -- Uso LLM por pieza (granularidad de tarea)

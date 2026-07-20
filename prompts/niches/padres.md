@@ -2,7 +2,7 @@
 
 ## Perfil del lector
 
-Padre o madre colombiano(a), 35–50 años, con hijo(a) en secundaria o preuniversitario. Siente que no puede ayudar al hijo con las materias (sobre todo matemáticas, química, física). Preocupado(a) por el futuro académico pero no sabe exactamente cómo actuar. En Instagram consume contenido entre 7–8 AM y 8–10 PM. Desconfía de promesas mágicas (ya compró un par que no funcionaron).
+Padre o madre colombiano(a), 35-50 años, con hijo(a) en cualquier grado escolar, principalmente secundaria (también primaria y universidad temprana). Siente que no puede ayudar al hijo con las materias (sobre todo matemáticas, química, física). Preocupado(a) por el futuro académico pero no sabe exactamente cómo actuar. En Instagram consume contenido entre 7–8 AM y 8–10 PM. Desconfía de promesas mágicas (ya compró un par que no funcionaron).
 
 ## Cómo le hablamos
 

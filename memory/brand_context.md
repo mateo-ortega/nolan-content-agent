@@ -20,8 +20,8 @@
 
 ICFES, Excelencia Académica, IA para adultos y Homeschooling son **rutas pre-configuradas** del producto core, no productos independientes.
 
-**L1 — Padres LATAM clase media-alta con hijos en bachillerato o universidad** (primario).
-Pain real: "Mi hijo estudia pero le va mal — no sé si es esfuerzo o método". Compran tranquilidad + resultado verificable + status educativo. No compran "horas de tutor".
+**L1 — Padres LATAM clase media-alta con estudiantes en edad escolar de cualquier edad, principalmente secundaria** (primario).
+Pain real: "Mi hijo estudia pero le va mal — no sé si es esfuerzo o método". Compran tranquilidad + resultado verificable + status educativo. No compran "horas de tutor". ICFES es ruta y gancho estacional, no el mensaje central.
 
 **L2 — Adultos profesionales LATAM que necesitan IA en su trabajo** (secundario).
 Pain real: "Probé ChatGPT, no le saqué utilidad. Mis colegas lo usan, yo me siento atrás."

@@ -1,0 +1,72 @@
+# alignment.yaml — Reglas del Alignment Gate (positivo, complementa ethics.yaml)
+#
+# Ethics = "no hagas dano" (regex prohibidas, bloquea)
+# Alignment = "haz bien" (cuotas, arquetipo, vocabulario resonante)
+#
+# Severidades:
+#   red    → bloquea publicacion (sys.exit 4 en package.py)
+#   yellow → no bloquea, anota meta.alignment_warnings y notifica a Mateo
+
+# Cuotas semanales por pillar (ventana 7 dias)
+# Calibrado para 1 pieza/dia con cuotas brand-profile fase 1-3
+# (tecnica_densa 40%, demostraciones_metodo 25%, filosofia 20%, testimonios 15%)
+pillar_quotas:
+  window_days: 7
+  caps:
+    tecnica_densa:         { yellow_above: 3, red_above: 5 }
+    demostraciones_metodo: { yellow_above: 2, red_above: 4 }
+    filosofia_educativa:   { yellow_above: 2, red_above: 4 }
+    testimonios_video:     { yellow_above: 1, red_above: 3 }
+    cultura_marca:         { yellow_above: 1, red_above: 3 }
+    producto:              { yellow_above: 1, red_above: 3 }
+
+# Arquetipos validos por formato (si format=carrusel y archetype no esta aqui → yellow)
+archetypes:
+  carrusel:    [senales, framework, tesis, comparativa]
+  carrusel-ds: [senales, framework, tesis, comparativa]
+  animacion:   [datos, demo, formula, narrativo]
+  guion:       [testimonial, declarativo, narrativo, framework]
+
+# Vocabulario resonante por nicho — el caption.md debe contener al menos UNA
+# de estas substrings (match tolerante: lowercase + sin acentos + contains)
+# Si no hay match → yellow ("la pieza no usa el lenguaje del nicho")
+# Source: prompts/niches/{niche}.md seccion "Frases que resuenan"
+resonant_keywords:
+  padres:
+    - "no es malo para"
+    - "aprende diferente"
+    - "vos podes acompanarlo"
+    - "lleva 20 minutos"
+    - "la diferencia no es el colegio"
+    - "el metodo"
+  jovenes_preicfes:
+    - "el prerequisito"
+    - "estudiar diferente"
+    - "metodo de estudio"
+    - "comprension real"
+    - "diagnostico"
+  adultos_ia:
+    - "productividad"
+    - "automatizar"
+    - "roi"
+    - "tu trabajo"
+    - "implementar"
+  pymes:
+    - "tu pyme"
+    - "operacion"
+    - "margen"
+    - "automatizar"
+
+# Frases que ALEJAN — si aparecen, yellow (overlap con ethics que ya bloquea
+# algunas; este check es defensivo para casos no cubiertos por regex de ethics)
+distance_phrases:
+  padres:
+    - "tienes la responsabilidad"
+    - "si no actuas"
+    - "tu hijo va a fracasar"
+    - "garantizamos que"
+    - "ningun colegio"
+  jovenes_preicfes:
+    - "te quedas atras"
+    - "vas a perder el ano"
+    - "garantizado"

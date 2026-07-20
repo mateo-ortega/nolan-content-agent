@@ -77,6 +77,27 @@ ethics_risk_estimate: low
 estimated_production_cost_usd: 0.12
 ```
 
+## Chequeo de duplicados (paso 0)
+
+Antes de aplicar cualquier regla, el script consulta `memory/pieces.sqlite` y compara el topic candidato con todos los ya producidos usando similitud Jaccard sobre tokens normalizados (sin acentos, sin stopwords).
+
+- **Umbral:** 0.55 Jaccard. Si el tema candidato comparte mas del 55% de tokens con uno existente, el script aborta con `exit(3)` y describe la colision.
+- **--force:** omite el chequeo cuando el angulo es intencionalmente distinto (ej. mismo fenomeno, publico diferente).
+- **DB ausente:** si `pieces.sqlite` no existe aun, el chequeo se salta sin error.
+
+```bash
+# Ejemplo de colision
+python3.12 decide_format.py --topic "bloqueo vs falta de esfuerzo" --niche jovenes_preicfes
+# [decide-format] DUPLICADO DETECTADO (Jaccard=0.75)
+#   Nuevo topic:     'bloqueo vs falta de esfuerzo'
+#   Ya existe:       'bloqueo de aprendizaje vs falta de esfuerzo'
+#   piece_id:        2026-05-02-bloqueo-de-aprendizaje-vs-falta-de-esfuerzo
+#   Si el angulo es distinto, usa --force para omitir este chequeo.
+
+# Forzar produccion con angulo distinto
+python3.12 decide_format.py --topic "bloqueo vs falta de esfuerzo" --niche padres --force
+```
+
 ## Pitfalls
 
 - **Regla 1 (matemáticas) es voraz**: no todo tema con un número va a Manim. Exigir fórmula real o transformación paso a paso, no solo "subir 40 puntos".

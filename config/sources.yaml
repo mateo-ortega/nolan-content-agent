@@ -93,6 +93,22 @@ rss:
     - name: "EAFIT Noticias"
       url: "https://www.eafit.edu.co/noticias/rss"
       tags: [universitarios, colombia, eafit]
+    # LATAM educacion + ciencia del aprendizaje (P2.1 — bajar dependencia evergreen)
+    - name: "BBC Mundo Educación"
+      url: "https://feeds.bbci.co.uk/mundo/topics/c7zp57yyz25t/rss.xml"
+      tags: [prensa, latam, educacion]
+    - name: "La República CO Educación"
+      url: "https://www.larepublica.co/rss/feed/educacion"
+      tags: [prensa, colombia, educacion, padres]
+    - name: "Infobae Educación"
+      url: "https://www.infobae.com/feeds/rss/feeds/feed-educacion.xml"
+      tags: [prensa, latam, educacion]
+    - name: "Tiching Blog"
+      url: "https://blog.tiching.com/feed/"
+      tags: [educacion, padres, metodologia]
+    - name: "Cognitive Load Theory (RetrievalPractice)"
+      url: "https://www.retrievalpractice.org/strategies?format=rss"
+      tags: [ciencia_aprendizaje, metodologia]
     # TBD — Mateo puede sumar feeds específicos
 
 # =============================================================================

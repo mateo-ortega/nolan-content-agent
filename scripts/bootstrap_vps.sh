@@ -163,7 +163,7 @@ stage_nolan() {
   log "TODO: rsync source tree desde máquina local (Windows) a ${NOLAN_ROOT}."
   log "Ejemplo desde Windows (WSL/PowerShell):"
   log "  rsync -avz --exclude='.git' --exclude='staging' --exclude='logs' \\"
-  log "    'c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/' \\"
+  log "    'c:/Users/USUARIO/Desktop/Proyectos/nolan-content-agent/' \\"
   log "    mateo@<vps-ip>:/srv/sapiens-nolan/"
   log ""
   log "Después:"

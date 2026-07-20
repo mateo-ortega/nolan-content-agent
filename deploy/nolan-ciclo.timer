@@ -1,0 +1,12 @@
+[Unit]
+Description=Nolan — timer ciclo diario 6AM Bogotá (11:00 UTC)
+Requires=nolan-ciclo.service
+
+[Timer]
+# Todos los días a las 11:00 UTC = 06:00 America/Bogota (UTC-5)
+OnCalendar=*-*-* 11:00:00 UTC
+AccuracySec=60s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

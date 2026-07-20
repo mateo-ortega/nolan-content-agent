@@ -1,0 +1,24 @@
+[Unit]
+Description=Hermes Agent Gateway — Nolan/Sapiens by Shift
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=/home/mateo/.hermes/.env
+
+ExecStart=/home/mateo/.local/bin/hermes gateway run
+
+# Reiniciar si el proceso muere (error de red, OOM, etc.)
+Restart=on-failure
+RestartSec=15s
+StartLimitIntervalSec=120s
+StartLimitBurst=5
+
+# Logs van al journal del usuario
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hermes-gateway
+
+[Install]
+WantedBy=default.target

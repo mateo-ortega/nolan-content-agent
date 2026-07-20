@@ -40,6 +40,7 @@ python3.12 /srv/sapiens-nolan/skills/nolan-produce-carrusel-ds/scripts/produce_c
    - Footer index `01 / 07` consistente con total.
    - Background rhythm: máx 2 surfaces consecutivos iguales.
    - Texto plano pasa ethics gate y no incluye palabras prohibidas v2.
+   - **Regla "una idea por slide":** body opcional ≤ 80 chars. Thesis sin `.kicker`. Comparative con `.frase` (no `.li`/`.col.old/.new`). Process con `.step-text` (no `.h`/`.p`).
 5. **Si falla** → reintento único con el error como hint al LLM.
 6. **Persistir** en `staging/<piece_id>/slides/slide-NN.html` y copiar `colors_and_type.css`, `fonts/`, `assets/` al staging.
 7. **Render:** `render.py` itera HTMLs y captura `slide-NN.png`.

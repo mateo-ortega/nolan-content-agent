@@ -52,22 +52,25 @@ echo "formato del día: $FORMAT (DOW=$(date +%u))"
 RESEARCH_OUT=$("$NOLAN_PYTHON" "$SCRIPTS/nolan-research/scripts/research.py" \
     --trigger cron 2>>"$LOG") || true
 
-# Umbral alineado con investigator.md:67 (score > 0.4). Antes filtraba >= 0.7,
-# lo que descartaba 40-50% de los temas que ya habían pasado el research.
-TOP=$( echo "$RESEARCH_OUT" | "$NOLAN_PYTHON" -c "
+# Filtrar shortlist por score >= 0.4 y guardar en tempfile (evita problemas
+# de quoting al pasar JSON inline al siguiente script Python).
+SHORTLIST_FILE="/tmp/shortlist_$$.json"
+echo "$RESEARCH_OUT" | "$NOLAN_PYTHON" -c "
 import sys, json
 try:
     data = json.loads(sys.stdin.read())
     sl = sorted(data.get('shortlist', []), key=lambda t: t.get('score', 0), reverse=True)
     sl = [t for t in sl if t.get('score', 0) >= 0.4]
-    if sl: print(json.dumps(sl[0]))
+    print(json.dumps(sl, ensure_ascii=False))
 except Exception:
-    pass
-" )
+    print('[]')
+" > "$SHORTLIST_FILE"
 
-if [[ -z "$TOP" ]]; then
+SHORTLIST_LEN=$( "$NOLAN_PYTHON" -c "import json,sys; print(len(json.load(open('$SHORTLIST_FILE'))))" )
+echo "shortlist filtrado: $SHORTLIST_LEN candidatos (score >= 0.4)"
+
+if [[ "$SHORTLIST_LEN" == "0" ]]; then
     echo "shortlist vacío — sin temas nuevos este ciclo"
-    # Notificar a Mateo vía Telegram
     "$NOLAN_PYTHON" - <<'PYEOF'
 import os, httpx
 token   = os.environ.get("HERMES_TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN","")
@@ -76,6 +79,40 @@ if token and chat_id:
     httpx.post(
         f"https://api.telegram.org/bot{token}/sendMessage",
         json={"chat_id": chat_id, "text": "Sin temas nuevos este ciclo. Research corrió, shortlist vacío."},
+        timeout=15,
+    )
+PYEOF
+    rm -f "$SHORTLIST_FILE"
+    exit 0
+fi
+
+# ── PASO 1.5: Dedup + rotación de pillar ─────────────────────────────────────
+# Itera el shortlist completo (no solo top 1) y elige el primer candidato que
+# NO sea duplicado (por evergreen_id, topic Jaccard/n-gramas, ni viole cuota
+# de pillar de los ultimos 7 dias). Si todos fallan, aborta el ciclo y notifica.
+TOP=$( "$NOLAN_PYTHON" - "$SHORTLIST_FILE" <<'PYEOF'
+import sys, json, os
+from pathlib import Path
+sys.path.insert(0, os.environ.get("NOLAN_PROJECT_ROOT", "."))
+from sapiens.dedup import find_non_duplicate
+candidates = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+choice = find_non_duplicate(candidates)
+if choice:
+    print(json.dumps(choice, ensure_ascii=False))
+PYEOF
+)
+rm -f "$SHORTLIST_FILE"
+
+if [[ -z "$TOP" ]]; then
+    echo "todos los candidatos del shortlist son duplicados o violan cuota de pillar — abortando ciclo"
+    "$NOLAN_PYTHON" - <<'PYEOF'
+import os, httpx
+token   = os.environ.get("HERMES_TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_BOT_TOKEN","")
+chat_id = os.environ.get("TELEGRAM_ALLOWED_USERS","").split(",")[0].strip()
+if token and chat_id:
+    httpx.post(
+        f"https://api.telegram.org/bot{token}/sendMessage",
+        json={"chat_id": chat_id, "text": "Ciclo abortado: todos los temas del shortlist son duplicados o violan cuota de pillar. Revisar log de research/dedup."},
         timeout=15,
     )
 PYEOF
@@ -104,6 +141,9 @@ brief = {
     "niche":                         top.get("nicho", "jovenes_preicfes"),
     "format":                        fmt,
     "archetype":                     top.get("archetype", "framework"),
+    "topic":                         top.get("tema", ""),
+    "pillar":                        top.get("pillar", "tecnica_densa"),
+    "evergreen_id":                  top.get("evergreen_id", ""),
     "hook":                          top.get("angulo", ""),
     "thesis":                        top.get("angulo", ""),
     "tone_calibration":              top.get("nicho", "jovenes") + "_directo",

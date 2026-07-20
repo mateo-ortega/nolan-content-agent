@@ -1,0 +1,24 @@
+[Unit]
+Description=Nolan — ciclo diario de producción autónoma
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=mateo
+WorkingDirectory=/srv/sapiens-nolan
+
+# Cargar variables de entorno desde el archivo Hermes
+EnvironmentFile=/home/mateo/.hermes/.env
+
+ExecStart=/srv/sapiens-nolan/scripts/ciclo.sh
+
+# El log va a /tmp/nolan-ciclo.log (append dentro del script)
+StandardOutput=journal
+StandardError=journal
+
+# Si falla, no reintentar automáticamente — esperar al próximo cron
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

@@ -2,9 +2,7 @@
 
 **Fuente de verdad** del agente de IA autónomo que produce contenido para Instagram `@sapiens.ed` bajo la identidad Sapiens by Shift.
 
-Este directorio es el **source tree** (versionado en Windows). Se despliega al VPS Hostinger como `/srv/sapiens-nolan/` y puebla `~/.hermes/` del usuario de servicio.
-
-> **Nota histórica de naming:** el directorio se llama "Agente creador de contenido Openclaw" por motivos legacy. El proyecto en sí **se llama Nolan** y corre sobre **Hermes Agent (Nous Research)**, no OpenClaw. Ver [plan maestro](../../../.claude/plans/contexto-inicial-para-claude-groovy-hejlsberg.md).
+Este directorio es el **source tree**. Se despliega al VPS Hostinger como `/srv/sapiens-nolan/` y puebla `~/.hermes/` del usuario de servicio.
 
 ## Qué es Nolan
 

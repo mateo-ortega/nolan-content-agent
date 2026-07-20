@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nolan — Plan de mejora · 2026-05-18</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #FAFAF7;
+  --bg-dark: #0B0D12;
+  --ink: #1A1C23;
+  --ink-soft: #4A5060;
+  --teal: #2B9E8F;
+  --teal-dark: #1F7A6F;
+  --gold: #E8A838;
+  --gold-soft: #F5C542;
+  --border: #E5E2D8;
+  --green: #4CAF50;
+  --yellow: #FFC107;
+  --red: #E63946;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  padding: 48px 24px;
+}
+
+.container { max-width: 1200px; margin: 0 auto; }
+
+/* HEADER */
+.header {
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 32px;
+  margin-bottom: 48px;
+}
+
+.header .eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.header h1 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.header h1 .accent { color: var(--teal); }
+.header h1 .gold { color: var(--gold); }
+
+.header .subtitle {
+  font-size: 20px;
+  color: var(--ink-soft);
+  font-style: italic;
+  max-width: 720px;
+}
+
+.meta {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.meta span strong { color: var(--ink); font-weight: 500; }
+
+/* SUMMARY */
+.summary {
+  background: var(--bg-dark);
+  color: #FAFAF7;
+  padding: 40px;
+  border-radius: 6px;
+  margin-bottom: 56px;
+}
+
+.summary h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+.summary ul { list-style: none; }
+.summary li {
+  font-size: 19px;
+  line-height: 1.5;
+  padding: 10px 0;
+  padding-left: 32px;
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.summary li:last-child { border-bottom: none; }
+.summary li::before {
+  content: "→";
+  color: var(--teal);
+  font-weight: 700;
+  position: absolute;
+  left: 0;
+}
+.summary li strong { color: var(--gold-soft); font-weight: 600; }
+
+/* SECTION TITLES */
+.section { margin-bottom: 64px; }
+
+.section-tag {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+
+.section h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin-bottom: 28px;
+}
+
+/* ESTADO ACTUAL */
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.status-col {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.status-col h3 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-col h3 .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.status-col.ok h3 .dot { background: var(--green); }
+.status-col.warn h3 .dot { background: var(--yellow); }
+.status-col.miss h3 .dot { background: var(--red); }
+
+.status-col ul { list-style: none; }
+.status-col li {
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px dashed var(--border);
+  line-height: 1.45;
+}
+.status-col li:last-child { border-bottom: none; }
+.status-col li code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--teal-dark);
+}
+
+/* TIERS */
+.tier {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 32px;
+  margin-bottom: 24px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 80px 1fr 200px;
+  gap: 28px;
+  align-items: start;
+}
+
+.tier-num {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 72px;
+  line-height: 0.9;
+  color: var(--bg);
+  letter-spacing: -0.04em;
+  -webkit-text-stroke: 2px var(--ink);
+  text-stroke: 2px var(--ink);
+}
+
+.tier.t1 .tier-num { -webkit-text-stroke-color: var(--red); }
+.tier.t2 .tier-num { -webkit-text-stroke-color: var(--gold); }
+.tier.t3 .tier-num { -webkit-text-stroke-color: var(--teal); }
+.tier.t4 .tier-num { -webkit-text-stroke-color: var(--ink-soft); }
+.tier.t5 .tier-num { -webkit-text-stroke-color: var(--ink-soft); }
+
+.tier-body { min-width: 0; }
+
+.tier-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.tier-head h3 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.tier-badge {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+}
+
+.tier.t1 .tier-badge { background: #FFEBEE; color: #B71C1C; border-color: #FFCDD2; }
+.tier.t2 .tier-badge { background: #FFF8E1; color: #B8860B; border-color: #FFE082; }
+.tier.t3 .tier-badge { background: #E0F2F1; color: #00695C; border-color: #B2DFDB; }
+
+.tier-why {
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin-bottom: 16px;
+  border-left: 3px solid var(--teal);
+  padding-left: 14px;
+}
+
+.tier-tasks { list-style: none; }
+.tier-tasks li {
+  padding: 7px 0;
+  padding-left: 28px;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.tier-tasks li::before {
+  content: "▸";
+  position: absolute;
+  left: 8px;
+  color: var(--teal);
+  font-weight: 700;
+}
+.tier-tasks li strong { color: var(--ink); font-weight: 600; }
+.tier-tasks code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 13px;
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: var(--teal-dark);
+}
+
+.tier-unlock {
+  background: var(--bg);
+  border-left: 3px solid var(--gold);
+  padding: 14px 16px;
+  margin-top: 18px;
+  font-size: 14px;
+}
+
+.tier-unlock strong {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.tier-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-left: 1px solid var(--border);
+  padding-left: 20px;
+}
+
+.metric-row { display: flex; flex-direction: column; gap: 4px; }
+
+.metric-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+
+.metric-val {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--ink);
+}
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+  margin-top: 6px;
+}
+.bar-fill { height: 100%; border-radius: 3px; }
+.bar-fill.high { background: var(--green); width: 90%; }
+.bar-fill.med-high { background: var(--gold); width: 70%; }
+.bar-fill.med { background: var(--gold-soft); width: 50%; }
+.bar-fill.low { background: var(--ink-soft); width: 30%; }
+
+/* TABLE */
+.table-wrap {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th {
+  background: var(--bg-dark);
+  color: var(--bg);
+  text-align: left;
+  padding: 14px 18px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+td.tier-cell {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--teal);
+}
+td code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  background: var(--bg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--teal-dark);
+  display: inline-block;
+  margin: 1px 2px;
+}
+
+/* CTA FINAL */
+.cta-final {
+  background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+  color: white;
+  padding: 48px;
+  border-radius: 6px;
+  margin-top: 48px;
+}
+
+.cta-final .eyebrow {
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-bottom: 12px;
+}
+
+.cta-final h2 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 42px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+
+.cta-final p {
+  font-size: 18px;
+  line-height: 1.5;
+  max-width: 680px;
+  margin-bottom: 28px;
+  opacity: 0.95;
+}
+
+.cta-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.cta-step {
+  background: rgba(255,255,255,0.1);
+  padding: 18px;
+  border-radius: 4px;
+  border-left: 3px solid var(--gold);
+}
+
+.cta-step .num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  color: var(--gold-soft);
+  margin-bottom: 6px;
+}
+
+.cta-step .txt {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+/* FOOTER */
+.footer {
+  margin-top: 64px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: 'Geist Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  body { padding: 24px 16px; }
+  .status-grid { grid-template-columns: 1fr; }
+  .tier { grid-template-columns: 1fr; }
+  .tier-num { font-size: 56px; }
+  .tier-meta {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 18px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .cta-steps { grid-template-columns: 1fr 1fr; }
+  .header h1 { font-size: 40px; }
+}
+
+@media (max-width: 540px) {
+  .cta-steps { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="eyebrow">sapiens by shift · plan de mejora · 2026 q2</div>
+    <h1>Nolan, <span class="accent">qué sigue</span><br>para que <span class="gold">funcione mejor</span>.</h1>
+    <p class="subtitle">Diagnóstico, prioridades y roadmap de 5 tiers para llevar a Nolan del estado funcional actual al sistema que aprende, escala y se replica.</p>
+    <div class="meta">
+      <span><strong>Fecha:</strong> 18 mayo 2026</span>
+      <span><strong>Estado:</strong> funcional end-to-end</span>
+      <span><strong>Próximo bloqueo crítico:</strong> feedback loop ciego</span>
+    </div>
+  </div>
+
+  <!-- RESUMEN EJECUTIVO -->
+  <div class="summary">
+    <h2>Resumen ejecutivo</h2>
+    <ul>
+      <li>Nolan produce <strong>carrusel, animación Manim y talking-head + post-pro</strong> en pipeline cerrado, con aprobación humana, ética codificada y budget guard. La base es sólida.</li>
+      <li>El cuello de botella no es técnico, es de información: <strong>el sistema no ve qué pasa después de publicar</strong>. Sin métricas de IG, el learning loop es ciego al 95% del flujo.</li>
+      <li>La prioridad #1 es <strong>cerrar el feedback loop</strong> (Tier 1). Después: voiceover end-to-end y hardening. Multi-tenant solo si se decide vender el sistema a clientes externos.</li>
+    </ul>
+  </div>
+
+  <!-- ESTADO ACTUAL -->
+  <div class="section">
+    <div class="section-tag">01 · diagnóstico</div>
+    <h2>Estado actual del sistema</h2>
+    <div class="status-grid">
+
+      <div class="status-col ok">
+        <h3><span class="dot"></span>Funciona bien</h3>
+        <ul>
+          <li>Carrusel v1 + carrusel-DS (PNG 1080×1350)</li>
+          <li>Animación Manim (3 templates, MP4 1080×1920)</li>
+          <li>Talking-head + <code>reels-postpro</code> (Whisper + face-track + subs)</li>
+          <li>Research multi-fuente (Tavily + DDG + Apify + RSS)</li>
+          <li>Decide-format con reglas + LLM</li>
+          <li>Package + rclone Drive + Telegram approval</li>
+          <li>Budget guard $50/mes con kill-switch</li>
+          <li>Prompt caching Anthropic en <code>copy.*</code></li>
+          <li>Ethics gate red/yellow</li>
+          <li>Learning loop con <code>rule_writer.py</code> semanal</li>
+        </ul>
+      </div>
+
+      <div class="status-col warn">
+        <h3><span class="dot"></span>Funciona pero limitado</h3>
+        <ul>
+          <li><code>produce_guion.py</code> con defectos (emoji, hashtags, sin EthicsGate, sin caching)</li>
+          <li>Learning loop solo procesa rechazos (~5% del flujo)</li>
+          <li>SQLite local sin backup automático a Drive</li>
+          <li><code>HANDOFF.md</code> desactualizado (fecha abril)</li>
+          <li>Sin tests automatizados (solo smoke tests bash)</li>
+          <li>Sin observabilidad estructurada (logs JSONL planos)</li>
+        </ul>
+      </div>
+
+      <div class="status-col miss">
+        <h3><span class="dot"></span>No existe aún</h3>
+        <ul>
+          <li>Voiceover end-to-end (Pexels + ElevenLabs + ffmpeg)</li>
+          <li>Analytics de performance IG (engagement, saves, shares)</li>
+          <li>Dashboard semanal con KPIs</li>
+          <li>Onboarding documentado multi-marca</li>
+          <li>A/B testing de variantes</li>
+          <li>Multi-canal LinkedIn / blog</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="section">
+    <div class="section-tag">02 · roadmap priorizado</div>
+    <h2>5 tiers, 8-12 semanas, impacto medible</h2>
+
+    <!-- TIER 1 -->
+    <div class="tier t1">
+      <div class="tier-num">01</div>
+      <div class="tier-body">
+        <div class="tier-head">
+          <h3>Cerrar el feedback loop</h3>
+          <span class="tier-badge">crítico</span>
+          <span class="tier-badge">2-3 semanas</span>
+        </div>
+        <div class="tier-why">Sin métricas de engagement, el learning loop ve solo el 5% del flujo (los rechazos). Esto bloquea cualquier mejora real de calidad porque Nolan no sabe qué funciona.</div>
+        <ul class="tier-tasks">
+          <li><strong>Skill <code>nolan-analytics</code></strong>: Apify IG scraper para <code>@sapiens.ed</code>, tabla <code>pieces_metrics</code> en SQLite, cron semanal.</li>
+          <li><strong>Extender <code>rule_writer.py</code></strong>: detectar patrones de top 20% engagement (no solo rechazos), generar reglas tanto "evitar X" como "repetir Y".</li>
+          <li><strong>Dashboard Telegram semanal</strong>: top 3 piezas, bottom 3, costo total, presupuesto restante, tasa de aprobación.</li>
+        </ul>
+        <div class="tier-unlock">
+          <strong>Qué desbloquea</strong>
+          Learning loop bidireccional. Permite contestar "¿qué formato/nicho/CTA está funcionando?" con datos reales, no intuición.
+        </div>
+      </div>
+      <div class="tier-meta">
+        <div class="metric-row">
+          <span class="metric-label">Impacto</span>
+          <span class="metric-val">Crítico</span>
+          <div class="bar"><div class="bar-fill high"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Esfuerzo</span>
+          <span class="metric-val">Medio</span>
+          <div class="bar"><div class="bar-fill med"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Costo extra</span>
+          <span class="metric-val">~$5/mes</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIER 2 -->
+    <div class="tier t2">
+      <div class="tier-num">02</div>
+      <div class="tier-body">
+        <div class="tier-head">
+          <h3>Voiceover end-to-end</h3>
+          <span class="tier-badge">alto impacto</span>
+          <span class="tier-badge">2 semanas</span>
+        </div>
+        <div class="tier-why">El formato de mayor engagement en IG hoy (reels con voiceover + b-roll) está bloqueado únicamente por la reference recording. Es el último formato faltante del mix prometido.</div>
+        <ul class="tier-tasks">
+          <li><strong>Reference recording Mateo</strong>: 30 min en condiciones controladas → ElevenLabs voice clone "Mateo Sapiens".</li>
+          <li><strong>Skill <code>nolan-produce-voiceover</code></strong>: Pexels/Pixabay search por keywords → crop a 9:16 → ElevenLabs TTS → ffmpeg composite + subs (reutilizar <code>reels-postpro/subtitles.py</code>) + music ducking.</li>
+          <li><strong>Integración al ciclo</strong>: martes/jueves alternar con animación; regla en <code>decide-format</code> "tema narrativo emocional sin matemática → voiceover".</li>
+        </ul>
+        <div class="tier-unlock">
+          <strong>Qué desbloquea</strong>
+          Mix completo de 4 formatos. 5 piezas/semana sostenibles. Capacidad de cubrir nichos emocionales (padres) sin depender de Mateo grabándose.
+        </div>
+      </div>
+      <div class="tier-meta">
+        <div class="metric-row">
+          <span class="metric-label">Impacto</span>
+          <span class="metric-val">Alto</span>
+          <div class="bar"><div class="bar-fill med-high"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Esfuerzo</span>
+          <span class="metric-val">Medio-alto</span>
+          <div class="bar"><div class="bar-fill med-high"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Costo extra</span>
+          <span class="metric-val">~$15/mes ElevenLabs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIER 3 -->
+    <div class="tier t3">
+      <div class="tier-num">03</div>
+      <div class="tier-body">
+        <div class="tier-head">
+          <h3>Hardening y reproducibilidad</h3>
+          <span class="tier-badge">medio impacto</span>
+          <span class="tier-badge">1-2 semanas</span>
+        </div>
+        <div class="tier-why">Si el VPS muere, el aprendizaje histórico se pierde. Si quieres replicar a otro cliente, no hay procedimiento. Trabajo de plomería pero hoy es un riesgo silencioso.</div>
+        <ul class="tier-tasks">
+          <li><strong>Backup SQLite automático</strong>: <code>scripts/backup_sqlite_cron.sh</code> con rclone copy a Drive diario 03:00, retención 30 días.</li>
+          <li><strong>Disaster recovery</strong>: <code>docs/disaster_recovery.md</code> con pasos de redeploy desde repo + Hostinger snapshot. Probar restore en VPS scratch 1 vez.</li>
+          <li><strong>Smoke test full pipeline</strong>: <code>tests/smoke_test_full_pipeline.sh</code> ejecuta research → decide → produce → package en <code>--dry-run</code>, valida dimensiones, costo, ethics.</li>
+          <li><strong>Fix <code>produce_guion.py</code></strong>: remover emoji + hashtags, integrar EthicsGate, añadir prompt caching.</li>
+          <li><strong>Actualizar <code>HANDOFF.md</code></strong>: fecha real, gaps reales, próximos pasos.</li>
+        </ul>
+        <div class="tier-unlock">
+          <strong>Qué desbloquea</strong>
+          Sistema robusto ante fallas. Calidad uniforme entre producers. Documentación de handoff confiable. Prerequisito para vender a externos.
+        </div>
+      </div>
+      <div class="tier-meta">
+        <div class="metric-row">
+          <span class="metric-label">Impacto</span>
+          <span class="metric-val">Medio</span>
+          <div class="bar"><div class="bar-fill med"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Esfuerzo</span>
+          <span class="metric-val">Bajo-medio</span>
+          <div class="bar"><div class="bar-fill low"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Costo extra</span>
+          <span class="metric-val">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIER 4 -->
+    <div class="tier t4">
+      <div class="tier-num">04</div>
+      <div class="tier-body">
+        <div class="tier-head">
+          <h3>Multi-tenant / preparación clientes externos</h3>
+          <span class="tier-badge">condicional</span>
+          <span class="tier-badge">2 semanas</span>
+        </div>
+        <div class="tier-why">Solo se ejecuta si la decisión es vender Nolan como servicio de agencia. Sin esto, replicar a un cliente nuevo toma 1+ semana de trabajo manual.</div>
+        <ul class="tier-tasks">
+          <li><strong>Parametrizar <code>reels-postpro</code></strong>: mover <code>SAPIENS_TEAL_HEX</code> y constantes de <code>subtitles.py</code>/<code>audio.py</code> a <code>brand_config.yaml</code> por cliente.</li>
+          <li><strong>Onboarding wizard</strong>: <code>scripts/onboard_client.sh</code> con 8 preguntas → genera <code>clients/&lt;name&gt;/</code> con SOUL.md custom, brand_context.md, colores, fonts, nichos, .env, rclone path.</li>
+          <li><strong>Tiempo target setup cliente</strong>: <4 horas.</li>
+          <li><strong>Doc comercial</strong>: <code>docs/client_onboarding.md</code> con checklist 1 semana, <code>docs/pricing_template.md</code> con tiers.</li>
+        </ul>
+        <div class="tier-unlock">
+          <strong>Qué desbloquea</strong>
+          Vender Nolan como servicio gestionado con setup fee + retainer. Replicabilidad real, no copy-paste manual.
+        </div>
+      </div>
+      <div class="tier-meta">
+        <div class="metric-row">
+          <span class="metric-label">Impacto</span>
+          <span class="metric-val">Condicional</span>
+          <div class="bar"><div class="bar-fill med"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Esfuerzo</span>
+          <span class="metric-val">Medio</span>
+          <div class="bar"><div class="bar-fill med"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Costo extra</span>
+          <span class="metric-val">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIER 5 -->
+    <div class="tier t5">
+      <div class="tier-num">05</div>
+      <div class="tier-body">
+        <div class="tier-head">
+          <h3>Calidad y escala (futuro)</h3>
+          <span class="tier-badge">opcional</span>
+          <span class="tier-badge">2-3 semanas</span>
+        </div>
+        <div class="tier-why">Optimización fina. No bloqueante, pero diferencia un "agente de contenido" de un "sistema de marketing inteligente". Solo después de Tier 1-3 sólidos.</div>
+        <ul class="tier-tasks">
+          <li><strong>A/B testing de variantes</strong>: <code>--variants=2</code> genera hook A vs B, CTA A vs B. Telegram approval elige o publica ambas. <code>pieces.sqlite</code> trackea ganadora.</li>
+          <li><strong>Multi-canal LinkedIn</strong>: skill <code>nolan-linkedin</code> reescribe copy a 1200×1200 y adapta tono.</li>
+          <li><strong>Self-improvement de prompts</strong>: cuando una regla se valida con >50 piezas, propone editar el prompt base del producer, no solo SOUL.md. Versionado git-style.</li>
+          <li><strong>Observabilidad</strong>: dashboard HTML estático con tasa de aprobación por nicho/formato/semana.</li>
+        </ul>
+        <div class="tier-unlock">
+          <strong>Qué desbloquea</strong>
+          Optimización iterativa autónoma. Cobertura multi-plataforma. Sistema que mejora sin intervención humana en el prompt engineering.
+        </div>
+      </div>
+      <div class="tier-meta">
+        <div class="metric-row">
+          <span class="metric-label">Impacto</span>
+          <span class="metric-val">Largo plazo</span>
+          <div class="bar"><div class="bar-fill med"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Esfuerzo</span>
+          <span class="metric-val">Alto</span>
+          <div class="bar"><div class="bar-fill med-high"></div></div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Costo extra</span>
+          <span class="metric-val">$5-20/mes</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABLA DE ARCHIVOS -->
+  <div class="section">
+    <div class="section-tag">03 · archivos a tocar</div>
+    <h2>Mapa de cambios por tier</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 70px">Tier</th>
+            <th>Crear</th>
+            <th>Modificar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tier-cell">01</td>
+            <td><code>skills/nolan-analytics/SKILL.md</code><code>ingest_metrics.py</code><code>dashboard_telegram.py</code></td>
+            <td><code>memory/schemas/*.sql</code><code>nolan-learning/rule_writer.py</code><code>config/cadence.yaml</code></td>
+          </tr>
+          <tr>
+            <td class="tier-cell">02</td>
+            <td><code>skills/nolan-produce-voiceover/scripts/produce_voiceover.py</code><code>VOICE_ID</code> en <code>.env</code></td>
+            <td><code>config/cadence.yaml</code><code>nolan-decide-format</code><code>prompts/formats/voiceover_broll.md</code></td>
+          </tr>
+          <tr>
+            <td class="tier-cell">03</td>
+            <td><code>scripts/backup_sqlite_cron.sh</code><code>docs/disaster_recovery.md</code><code>tests/smoke_test_full_pipeline.sh</code></td>
+            <td><code>HANDOFF.md</code><code>nolan-produce-guion/scripts/produce_guion.py</code><code>scripts/ciclo.sh</code></td>
+          </tr>
+          <tr>
+            <td class="tier-cell">04</td>
+            <td><code>clients/</code><code>scripts/onboard_client.sh</code><code>docs/client_onboarding.md</code></td>
+            <td><code>reels-postpro/subtitles.py</code><code>reels-postpro/audio.py</code> paths globales</td>
+          </tr>
+          <tr>
+            <td class="tier-cell">05</td>
+            <td><code>skills/nolan-linkedin/</code> prompts versionados</td>
+            <td><code>produce_carrusel.py</code> (<code>--variants</code>) logging estructurado</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <div class="cta-final">
+    <div class="eyebrow">recomendación · próximas 48h</div>
+    <h2>Arranca Tier 1.<br>Sin métricas, Nolan está optimizando a ciegas.</h2>
+    <p>El resto puede esperar. Voiceover sin feedback loop solo agrega volumen, no calidad. Hardening sin métricas tampoco mueve la aguja del producto. El orden importa: <strong>Tier 1 → Tier 2 → Tier 3</strong>. Tier 4 solo si la decisión comercial está tomada.</p>
+    <div class="cta-steps">
+      <div class="cta-step">
+        <div class="num">01</div>
+        <div class="txt">Aprobar este plan</div>
+      </div>
+      <div class="cta-step">
+        <div class="num">02</div>
+        <div class="txt">Diseñar schema <code style="color:#FAFAF7;background:rgba(255,255,255,0.15);padding:1px 4px;border-radius:2px;font-family:'Geist Mono',monospace;font-size:13px;">pieces_metrics</code></div>
+      </div>
+      <div class="cta-step">
+        <div class="num">03</div>
+        <div class="txt">Dar de alta @sapiens.ed en Apify scraper</div>
+      </div>
+      <div class="cta-step">
+        <div class="num">04</div>
+        <div class="txt">Primer dashboard Telegram en 14 días</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>nolan · sapiens by shift · 2026-05-18</span>
+    <span>plan-mejora-v1 · diagnóstico + roadmap</span>
+  </div>
+
+</div>
+</body>
+</html>

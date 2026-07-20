@@ -2,7 +2,7 @@
 
 ## Perfil del lector
 
-Estudiante de grado 10–11, 15–18 años, en Colombia. Tiene el ICFES / Saber 11 en el horizonte (meses o semanas). Quiere un puntaje alto como validación académica y para acceder a universidades competitivas. Siente presión pero no siempre tiene claro cómo traducirla en acción. Usa Instagram y TikTok más que cualquier otra plataforma. Tiene bullshit-detector afinado: detecta inmediatamente cuando le están vendiendo algo. Valora que le hablen de frente, sin paternalismo.
+Estudiante de secundaria en Colombia, 12-18 años. El caso pico es grado 10-11 con el ICFES / Saber 11 en el horizonte (meses o semanas), pero el nicho cubre toda la secundaria: bloqueos de método, materias cuesta arriba, presión académica. Cuando aplica ICFES: quiere un puntaje alto como validación académica y para acceder a universidades competitivas. Siente presión pero no siempre tiene claro cómo traducirla en acción. Usa Instagram y TikTok más que cualquier otra plataforma. Tiene bullshit-detector afinado: detecta inmediatamente cuando le están vendiendo algo. Valora que le hablen de frente, sin paternalismo.
 
 ## Cómo le hablamos
 

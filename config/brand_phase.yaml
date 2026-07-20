@@ -1,0 +1,25 @@
+# brand_phase.yaml — Fase actual de Sapiens (cold start / validacion / escala)
+#
+# Determina que pillars de contenido estan permitidos en este momento. La fase
+# se calcula desde la fecha base hacia adelante; ajustar `phase_start` si pivota
+# el GTM. Referencia: Sapiens_GTM/brand-profile.json fase 1-3 corre hasta
+# 2026-07-25 (90 dias desde el pivote v2 del 2026-04-25).
+
+phase_start: "2026-04-25"
+phase_1_3_end: "2026-07-25"  # cold start (validacion de demand + voz)
+
+# Pillars permitidos por fase
+# Si un pillar no esta listado aqui, alignment_gate bloquea (RED)
+pillars_by_phase:
+  phase_1_3:
+    - tecnica_densa
+    - filosofia_educativa
+    - demostraciones_metodo
+    - testimonios_video
+  phase_4_plus:
+    - tecnica_densa
+    - filosofia_educativa
+    - demostraciones_metodo
+    - testimonios_video
+    - cultura_marca
+    - producto

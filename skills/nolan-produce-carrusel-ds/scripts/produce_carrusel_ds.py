@@ -221,6 +221,11 @@ REGLAS CRÍTICAS — cualquier violación invalida la salida:
 8. **NO toques** las clases CSS, los `<style>`, los estilos inline `style="..."`, las imágenes (`<img src=...>`), ni `<link rel="stylesheet">`. SOLO cambias texto entre etiquetas.
 9. **Footer index `NN / NN`:** actualiza ambos números para reflejar la posición real y el total. Ejemplo: si haces 6 slides y este es el 3°, debe decir `03 / 06`.
 10. **Eyebrows/tags** (texto Jura uppercase): traduce al contenido de cada slide. Ejemplos válidos: 'La tesis · 02 / 06', 'Comparativa · 03 / 06', 'El método · 04 / 06', 'El dato · 05 / 06', 'Empieza · 06 / 06'. Para BigQuote (si lo usas): 'Caso real · NN / NN'.
+11. **UNA SOLA IDEA POR SLIDE.** Cada slide desarrolla UN solo concepto, expresado en el TEXTO PRINCIPAL del template. NO uses estructura tipo título + subtítulo + cuerpo largo. Excepciones explícitas y únicas:
+    - **Comparative:** contrasta dos polos del MISMO concepto (no son dos ideas, es UN contraste). Estructura nueva: `.side.old` con `.label` + `.frase` (UNA frase máx 8 palabras), y `.side.new` con `.label` + `.frase` (UNA frase máx 8 palabras). NO uses `<div class="li">` ni bullets — el template viejo con `.col.old/.col.new/.li/.big` fue ELIMINADO.
+    - **Process:** UNA secuencia de pasos donde cada `.step` tiene UN solo `<div class="step-text">…</div>` (frase única máx 12 palabras). NO uses `class="h"` ni `class="p"` dentro de `.step` — la separación título-paso/descripción fue ELIMINADA.
+    - **Thesis:** ya NO tiene `.kicker`. Solo `.thesis` (texto principal único) + `.body` opcional.
+12. **Body opcional, máx 80 caracteres (sin `<br>`).** El campo `<div class="body">` es OPCIONAL: úsalo SOLO cuando aporte un matiz que NO cabe en el texto principal. NUNCA repitas la idea principal en el body. Si dudas, omítelo (déjalo como `<div class="body"></div>` vacío o quita la línea entera). Si necesitas más de 80 chars para explicar algo, ESO ES OTRO SLIDE.
 
 ORDEN NARRATIVO POR DEFECTO (6 slides — sin BigQuote):
   Cover → Thesis → Comparative → Process → Stat → CTA
@@ -379,6 +384,47 @@ def _validate_slides(slides: list[str]) -> None:
                 f"Paleta: Cover=teal, Thesis=warm, Comparative=warm, Process=cream, "
                 f"BigQuote=cream, Stat=teal-deep, CTA=dark. "
                 f"Intercala cream/dark entre los dos slides warm."
+            )
+
+    # ── Body opcional ≤ 80 chars (regla "una idea por slide") ───────────────
+    for i, html in enumerate(slides, start=1):
+        for body_text in re.findall(r'class="body"[^>]*>([^<]+)</div>', html):
+            body_clean = re.sub(r'<br\s*/?>', ' ', body_text).strip()
+            if len(body_clean) > 80:
+                errors.append(
+                    f"slide-{i:02d}: .body tiene {len(body_clean)} chars > 80 máx. "
+                    f"Si necesitas más, parte el contenido en otro slide o quita el body. "
+                    f"Texto: '{body_clean[:50]}…'"
+                )
+
+    # ── Estructura simplificada de templates densos ─────────────────────────
+    # Thesis: sin .kicker (eliminado en mayo 2026)
+    # Comparative: sin .li, .col.old/.col.new, .big — usar .side.old/.side.new + .frase
+    # Process: sin .h ni .p dentro de .step — usar .step-text
+    for i, html in enumerate(slides, start=1):
+        is_thesis = "sapiens · Thesis" in html
+        is_comparative = "sapiens · Comparative" in html
+        is_process = "sapiens · Process" in html
+
+        if is_thesis and 'class="kicker"' in html:
+            errors.append(
+                f"slide-{i:02d} (Thesis): contiene `class=\"kicker\"` que fue ELIMINADO. "
+                f"Usa solo `.thesis` (texto principal único) + `.body` opcional."
+            )
+        if is_comparative:
+            if re.search(r'class="li"', html) or re.search(r'class="col old"', html) or re.search(r'class="col new"', html):
+                errors.append(
+                    f"slide-{i:02d} (Comparative): usa estructura vieja con `.li`/`.col.old/.new`. "
+                    f"Estructura nueva: `.side.old` con `.label` + `.frase`, y `.side.new` igual. SIN bullets."
+                )
+            if 'class="frase"' not in html:
+                errors.append(
+                    f"slide-{i:02d} (Comparative): falta `class=\"frase\"`. Cada `.side` debe tener UNA `.frase` única."
+                )
+        if is_process and re.search(r'class="step-text"', html) is None:
+            errors.append(
+                f"slide-{i:02d} (Process): falta `class=\"step-text\"`. "
+                f"Cada `.step` ahora tiene UN solo `<div class=\"step-text\">…</div>` (sin `.h` ni `.p`)."
             )
 
     if errors:

@@ -1,7 +1,7 @@
 # HANDOFF — Proyecto Nolan (Sapiens by Shift)
 
-**Fecha de última actualización:** 2026-04-20
-**Estado global:** Pipeline carrusel end-to-end funcionando en dry-run y render real. Falta integración Telegram callbacks, research, animación, voiceover.
+**Fecha de última actualización:** 2026-05-18
+**Estado global:** Pipeline completo end-to-end operativo en VPS. Carrusel v1 + carrusel-DS + animación Manim + talking-head (reels-postpro) + research + callbacks + learning loop corriendo bajo systemd. rclone Drive configurado y operativo. **@sapiens.ed comienza a publicar el 2026-05-19.** Próximo hito: Tier 1 feedback loop (semana del 19 mayo).
 
 ---
 
@@ -33,9 +33,9 @@ Mateo (Telegram) ──► Hermes Agent (VPS) ──► skills/nolan-*/scripts/*
 
 ### VPS (Hostinger KVM 2)
 
-- **IP**: `187.77.4.238`
+- **IP**: `<VPS_IP>`
 - **OS**: Ubuntu 24.04 LTS
-- **Usuario**: `mateo` (sudo)
+- **Usuario**: `<usuario_vps>` (sudo)
 - **SSH**: key ed25519 desde Windows, puerto 22 único abierto (UFW activo)
 - **Tree del proyecto**: `/srv/sapiens-nolan/`
 - **Venv**: `/srv/nolan-venv/` (Python 3.12.3) — activar con `source /srv/nolan-venv/bin/activate`
@@ -44,7 +44,7 @@ Mateo (Telegram) ──► Hermes Agent (VPS) ──► skills/nolan-*/scripts/*
 
 - Python 3.12.3, FFmpeg 6.1.1, LuaLaTeX (TeX Live 2023), Manim 0.20.1
 - Playwright + Chromium headless
-- rclone 1.60.1 (SIN configurar aún)
+- rclone 1.60.1 (configurado, remote `gdrive_sapiens` operativo)
 - SQLite 3.45.1, Docker 29.4.0
 - Fuentes Sapiens en `/usr/share/fonts/sapiens/`: Outfit, Instrument Sans, Geist Mono, Jura
 - Swap 8 GB
@@ -64,13 +64,13 @@ Mateo (Telegram) ──► Hermes Agent (VPS) ──► skills/nolan-*/scripts/*
 
 - `OPENROUTER_API_KEY` ✅
 - `TELEGRAM_BOT_TOKEN` ✅
-- `TELEGRAM_ALLOWED_USERS=5638117128` (ID Mateo) ✅
+- `TELEGRAM_ALLOWED_USERS=<TELEGRAM_USER_ID>` (ID Mateo) ✅
 
 ### Secrets pendientes
 
-- `PERPLEXITY_API_KEY` (para `nolan-research` — web search news CO)
-- `APIFY_TOKEN` (scraping IG/TikTok)
-- `PEXELS_API_KEY`, `PIXABAY_API_KEY` (b-roll para voiceover)
+- `ELEVENLABS_API_KEY` (para `nolan-produce-voiceover` cuando se implemente)
+- `PEXELS_API_KEY`, `PIXABAY_API_KEY` (b-roll para voiceover — aún no implementado)
+- `IG_HANDLE=sapiens.ed` en `.env` (necesario para `nolan-analytics` — Tier 1)
 
 ---
 
@@ -78,7 +78,7 @@ Mateo (Telegram) ──► Hermes Agent (VPS) ──► skills/nolan-*/scripts/*
 
 ```
 /srv/sapiens-nolan/                 (VPS)
-c:\Users\USUARIO\Desktop\Proyectos\Agente creador de contenido Openclaw\   (Windows local)
+c:\Users\USUARIO\Desktop\Proyectos\nolan-content-agent\   (Windows local)
 │
 ├── SOUL.md                          # Personalidad Nolan — Mateo edita
 ├── AGENTS.md                        # Convenciones operativas — Mateo edita
@@ -151,6 +151,8 @@ c:\Users\USUARIO\Desktop\Proyectos\Agente creador de contenido Openclaw\   (Wind
 ---
 
 ## 4. Estado de implementación
+
+> Última revisión: 2026-05-18. Las secciones 4.1–4.7 documentan lo que estaba implementado al 2026-04-20. Lo implementado desde entonces se lista en §4.8.
 
 ### ✅ COMPLETADO
 
@@ -262,74 +264,54 @@ CLI: `--topic <texto>`, `--niche <id>`
 - **Dry-run**: `python3.12 skills/nolan-produce-carrusel/scripts/produce_carrusel.py --brief staging/fixtures/brief-icfes-lectura-critica.yaml --dry-run` → OK (5 slides placeholder, costo $0)
 - **Render real**: mismo comando sin `--dry-run` → genera 7 slides PNG con Playwright en `staging/2026-04-22-icfes-lectura-critica-metodo/`
 
+#### 4.8. Implementado desde 2026-04-20 (hitos adicionales)
+
+- **`nolan-produce-animacion`**: Manim operativo (3 templates: BarChart, CurveReveal, StepReveal). Safe zone check post-render con `animacion_check.py`. Integrado al ciclo martes/viernes.
+- **`nolan-produce-carrusel-ds`**: 7 templates HTML magazine-layout. Render vía Playwright. Jueves automático.
+- **`nolan-produce-guion`**: script teleprompter 30-60s para Mateo. ⚠️ Defectos conocidos: emoji 🎥, hashtags, sin EthicsGate, sin caching — requiere fix.
+- **`nolan-callbacks`**: handlers `/aprobar`, `/rechazar`, `/editar` implementados como scripts Python.
+- **`nolan-learning`**: `rule_writer.py` + `apply_rule.py`. Cron domingo 18:00 Bogotá. Analiza rechazos ≥3 ocurrencias. Propone reglas vía DeepSeek, aprobación por Telegram antes de aplicar.
+- **`nolan-research`**: Tavily + DuckDuckGo + Apify + RSS. Escribe a `memory/trends.sqlite`.
+- **`reels-postpro/`**: módulo Python 1166 LOC para post-producción de talking-heads. Whisper ES + face-track + subtítulos ASS Sapiens + denoise + loudnorm -16 LUFS. 7 sesiones procesadas a mayo-17.
+- **rclone Drive**: configurado y operativo. `RCLONE_REMOTE` presente en `.env` VPS.
+- **`nolan-llm-router` con NIM fallback**: DeepSeek v4 Flash vía NVIDIA NIM (gratuito, 40 RPM) + fallback OpenRouter. Costo actual ~$7/mes.
+- **`memory/trends.sqlite`**: schema completo e inicializado.
+- **`memory/pieces.sqlite`**: operativo, actualizado por package.py y callbacks.
+
 ---
 
 ### ⚠️ PENDIENTE
 
-#### 5.1. CRÍTICO — Validar calidad visual del render real
+#### 5.1. Fix `nolan-produce-guion` (prioridad baja)
 
-Mateo descargó el carrusel a su PC (`scp -r` a `C:\Users\USUARIO\Desktop\carrusel-icfes`) pero NO confirmó que los slides se vean bien.
+`skills/nolan-produce-guion/scripts/produce_guion.py` tiene defectos menores:
+- Incluye emoji 🎥 en output
+- Incluye hashtags (prohibidos por brand_context)
+- No pasa por EthicsGate
+- No usa prompt caching para brand_context.md
 
-**Siguiente paso literal**: Ver los PNGs descargados. Verificar:
-- ¿Los textos tienen tildes correctas (método, crítico, después)?
-- ¿Los slides NO están en blanco?
-- ¿El bloque dorado NO tapa texto (gesto `bloque` no debe aparecer)?
-- ¿La jerarquía tipográfica se respeta (palabra accent en dorado, body gris, etc.)?
-- ¿Hay slides desbordados por texto demasiado largo en `escala`?
+Fix estimado: 1-2 horas. Editar `produce_guion.py` + SKILL.md.
 
-Si algo falla: iterar sobre el prompt en `_CARRUSEL_SYSTEM_TEMPLATE` de `produce_carrusel.py` y los límites de caracteres.
+#### 5.2. Backup SQLite automático
 
-#### 5.2. Scripts NO implementados
+`memory/pieces.sqlite` y `memory/trends.sqlite` viven en VPS sin replicación. Un crash = perder el historial de aprendizaje y aprobaciones.
 
-**`skills/nolan-research/scripts/research.py`** — más pesado
-- Consume Apify (IG/TikTok scraping), RSS feeds, Perplexity news CO, Google Trends
-- Escribe a `memory/trends.sqlite`
-- Dedupe + scoring de temas
-- Rate limits: max 40 llamadas DeepSeek/ciclo, max 20 Apify runs/semana (cuota en `memory/apify_quota.jsonl`)
-- Output: shortlist de temas puntuados por nicho
+Implementar `scripts/backup.sh`: `rclone copy memory/*.sqlite gdrive_sapiens:SapiensContent/backups/` + cron 3AM Bogotá. Ver Tier 5.1 del roadmap.
 
-**`skills/nolan-produce-animacion/scripts/produce_animacion.py`**
-- Genera script Manim (.py) desde brief con LaTeX
-- Compila con `manim -qm` (medium quality)
-- Rate limit: 1-2 por semana (costo CPU alto)
-- Output: video MP4 + thumbnail
+#### 5.3. Smoke test full pipeline
 
-**`skills/nolan-produce-voiceover/scripts/produce_voiceover.py`**
-- Genera guion (copy.voiceover_script → Sonnet cached)
-- Busca b-roll en Pexels/Pixabay API
-- Genera voz con ElevenLabs (opcional, con flag)
-- Compone con ffmpeg (audio + video)
+`scripts/smoke_tests.sh` existe pero no cubre el ciclo completo. Pendiente: añadir validación de dimensiones PNG, costo < $0.30/pieza, ethics green como pre-flight del `ciclo.sh`. Ver Tier 5.2 del roadmap.
 
-#### 5.3. Telegram callback handlers
+#### 5.4. Voiceover end-to-end
 
-Los botones inline (`/aprobar`, `/rechazar`, `/editar`) los manda `package.py` vía `callback_data`. **NADIE los procesa aún.** Hay que implementar handlers que:
+Formato pendiente del plan original. Bloqueado por reference recording (30 min de Mateo → ElevenLabs voice clone). Ver Tier 5.4 del roadmap. Esfuerzo: L (5-7 días).
 
-- `/aprobar <piece_id>`: mover `staging/<id>` → `drive-mount/aprobados/<id>`, actualizar sqlite a `approved`, responder confirmación
-- `/rechazar <piece_id> <motivo>`: mover a `drive-mount/rechazados/`, guardar motivo en sqlite para aprendizaje
-- `/editar <piece_id> <instrucciones>`: re-invocar `produce_carrusel.py` con corrección aplicada
+#### 5.5. Pendientes menores
 
-Decisión pendiente: ¿Los handlers son scripts Python separados invocados por Hermes, o se manejan dentro de `hermes-gateway.service`? Probablemente **scripts separados** para mantener el patrón de "todo pasa por scripts".
+- `package.py`: `sendMediaGroup` + `sendMessage` duplicados — evaluar si eliminar uno.
+- `~/.hermes/config.yaml`: verificar que `timezone: 'America/Bogota'` esté seteado.
 
-#### 5.4. Scheduler cron L-W-V
-
-Según `config/cadence.yaml`, Nolan debe producir piezas automáticamente Lunes/Miércoles/Viernes. Pendiente:
-- Cron entry en VPS (`crontab -e`) que invoca un script `scripts/scheduled_produce.sh`
-- El script debe: elegir top tema de trends.sqlite → decidir formato → producir → empaquetar → notificar
-- Respetar `/pausa` y `/reanudar` (bandera en sqlite o archivo)
-
-#### 5.5. Integraciones
-
-- **rclone**: configurar remote `gdrive_sapiens` → `SapiensContent/` en Drive. Sin esto, `package.py` skipea Drive sync silenciosamente.
-- **memory/trends.sqlite**: inicializar schema (tabla `topics` con columnas id, niche, text, score, source, created_at, used)
-- **Budget comando**: exponer `python -m sapiens.nolan_llm_router --budget` para que `/budget` de Telegram tenga datos
-
-#### 5.6. Mejoras pendientes identificadas
-
-- `produce_carrusel.py`: después del render, validar que el número de PNGs generados == número de slides en YAML. Si no, fallar con error claro.
-- `ethics_gate.py`: agregar test de coocurrencia `tres-pasos-mágicos` (hype educativo).
-- `package.py`: el `sendMediaGroup` manda el mismo `msg` como caption del primer slide Y después un `sendMessage` duplicado. Evaluar si eliminar uno.
-
-#### 5.7. Prompts operativos unificados (investigación → guionización)
+#### 5.6. Prompts operativos unificados (investigación → guionización)
 
 Los archivos en `prompts/` contienen piezas modulares (system prompts, calibración por nicho, specs de formato), pero **no existían prompts autocontenidos listos para copiar y pegar** que un humano o script pueda usar directamente contra una IA.
 
@@ -356,13 +338,13 @@ Los archivos en `prompts/` contienen piezas modulares (system prompts, calibraci
 
 ```powershell
 # Subir archivo puntual al VPS
-scp "C:\Users\USUARIO\Desktop\Proyectos\Agente creador de contenido Openclaw\<path>" mateo@187.77.4.238:/srv/sapiens-nolan/<path>
+scp "C:\Users\USUARIO\Desktop\Proyectos\nolan-content-agent\<path>" <usuario_vps>@<VPS_IP>:/srv/sapiens-nolan/<path>
 
 # SSH al VPS
-ssh mateo@187.77.4.238
+ssh <usuario_vps>@<VPS_IP>
 
 # Descargar carrusel generado
-scp -r mateo@187.77.4.238:/srv/sapiens-nolan/staging/<piece_id> "C:\Users\USUARIO\Desktop\<nombre>"
+scp -r <usuario_vps>@<VPS_IP>:/srv/sapiens-nolan/staging/<piece_id> "C:\Users\USUARIO\Desktop\<nombre>"
 ```
 
 ### En el VPS
@@ -429,20 +411,19 @@ Registrados para que no vuelvan a pasar:
    - `AGENTS.md` — convenciones (NO editar sin pedir)
    - `memory/brand_context.md` — voz de marca
 
-2. **Verificar memoria persistente de Claude Code**:
-   - `C:\Users\USUARIO\.claude\projects\c--Users-USUARIO-Desktop-Proyectos-Agente-creador-de-contenido-Openclaw\memory\MEMORY.md`
+2. **Verificar memoria persistente de Claude Code** (proyecto local, contexto de sesiones previas):
    - `project_nolan_state.md`, `feedback_mateo_workflow.md`
 
 3. **Validar que el VPS responde**:
    ```bash
-   ssh mateo@187.77.4.238 'cd /srv/sapiens-nolan && ls skills/nolan-produce-carrusel/scripts/'
+   ssh <usuario_vps>@<VPS_IP> 'cd /srv/sapiens-nolan && ls skills/nolan-produce-carrusel/scripts/'
    ```
 
-4. **Confirmar con Mateo** qué tarea abordar. Probables candidatos por prioridad:
-   - Implementar Telegram callback handlers (`/aprobar`, `/rechazar`, `/editar`)
-   - Implementar `nolan-research` (más complejo pero desbloquea automatización L-W-V)
-   - Configurar rclone + Drive sync
-   - Implementar `nolan-produce-voiceover` o `nolan-produce-animacion`
+4. **Confirmar con Mateo** qué tarea abordar. Prioridades al 2026-05-18:
+   - **Tier 1 (semana del 19 mayo):** skill `nolan-analytics` + extender `rule_writer.py` + dashboard Telegram semanal. Ver `docs/nolan-roadmap-amplificacion.md` §Tier 1.
+   - **Tier 5.1:** backup SQLite nocturno (`scripts/backup.sh`).
+   - **Fix `produce_guion.py`:** remover emoji/hashtags, integrar EthicsGate.
+   - **Voiceover (Q3):** requiere 30 min de reference recording de Mateo primero.
 
 5. **Workflow preferido de Mateo** (ver memoria `feedback_mateo_workflow.md`):
    - Sesiones separadas por fase — no mezclar muchas cosas
@@ -451,9 +432,9 @@ Registrados para que no vuelvan a pasar:
 
 ### Si el usuario dice "subí X al VPS":
 
-Usar `scp` desde PowerShell con ruta absoluta y IP `187.77.4.238`:
+Usar `scp` desde PowerShell con ruta absoluta y IP `<VPS_IP>`:
 ```powershell
-scp "C:\Users\USUARIO\Desktop\Proyectos\Agente creador de contenido Openclaw\<path>" mateo@187.77.4.238:/srv/sapiens-nolan/<path>
+scp "C:\Users\USUARIO\Desktop\Proyectos\nolan-content-agent\<path>" <usuario_vps>@<VPS_IP>:/srv/sapiens-nolan/<path>
 ```
 
 **NO** uses `\` para continuación de línea en PowerShell (eso es bash). PowerShell usa backtick `` ` `` o una sola línea.

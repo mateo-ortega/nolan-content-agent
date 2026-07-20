@@ -7,6 +7,10 @@ hermes/.env
 credentials.json
 service-account*.json
 
+# === Archivos temporales / runtime local ===
+*.tmp
+.claude/
+
 # === Runtime / output ===
 staging/
 drive-mount/

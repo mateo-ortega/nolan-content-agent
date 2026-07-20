@@ -8,15 +8,15 @@ Este documento es una reconstrucción cronológica de todos los cambios realizad
 ## Eje 1: Re-arquitectura de Personalidad (Silencio de Máquina)
 **Objetivo:** Eliminar la tendencia de Nolan de narrar sus procesos en el chat de Telegram.
 
-- **[MODIFICACIÓN] [SOUL.md](file:///c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/SOUL.md)**: Se inyectó la directiva "Silencio de Máquina". Ahora Nolan tiene prohibido saludar, narrar o explicar. Solo debe ejecutar y notificar éxito.
-- **[MODIFICACIÓN] [AGENTS.md](file:///c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/AGENTS.md)**: Se actualizó el contrato operativo prohibiendo diálogos intermedios y forzando el retorno de botones solo al final del empaquetado (luego removido).
+- **[MODIFICACIÓN] [SOUL.md](SOUL.md)**: Se inyectó la directiva "Silencio de Máquina". Ahora Nolan tiene prohibido saludar, narrar o explicar. Solo debe ejecutar y notificar éxito.
+- **[MODIFICACIÓN] [AGENTS.md](AGENTS.md)**: Se actualizó el contrato operativo prohibiendo diálogos intermedios y forzando el retorno de botones solo al final del empaquetado (luego removido).
 
 ---
 
 ## Eje 2: Sincronización y Jerarquía de Drive
 **Objetivo:** Organizar las salidas de Nolan automáticamente por formato.
 
-- **[REFACTOR] [package.py](file:///c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/skills/nolan-package/scripts/package.py)**:
+- **[REFACTOR] [package.py](skills/nolan-package/scripts/package.py)**:
   - Se implementó la lógica de carpetas jerárquicas: `Nolan / {Formato} / {piece_id}`.
   - Se configuró el comando `rclone` dinámico para crear estas carpetas en el Drive sin intervención.
 
@@ -25,18 +25,18 @@ Este documento es una reconstrucción cronológica de todos los cambios realizad
 ## Eje 3: El Cerebro Creador (La Súper Skill)
 **Objetivo:** Crear un orquestador que unifique la decisión y la producción.
 
-- **[NUEVO] [producir.py](file:///c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/skills/nolan-producir/scripts/producir.py)**:
+- **[NUEVO] [producir.py](skills/nolan-producir/scripts/producir.py)**:
   - **Fase A:** Llama a `decide_format.py` (DeepSeek) para obtener el brief técnico.
   - **Fase B:** Ejecuta condicionalmente `produce_carrusel.py`, `produce_animacion.py` o nuestra nueva skill de guiones.
   - **Fase C:** Ejecuta el empaquetado final.
-- **[NUEVO] [SKILL.md (Producir)](file:///c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/skills/nolan-producir/SKILL.md)**: Instrucciones drásticas de "No conversar" y "Usar terminal" para el gateway de Hermes.
+- **[NUEVO] [SKILL.md (Producir)](skills/nolan-producir/SKILL.md)**: Instrucciones drásticas de "No conversar" y "Usar terminal" para el gateway de Hermes.
 
 ---
 
 ## Eje 4: Producción de Guiones para Mateo
 **Objetivo:** Cumplir el requerimiento de generar guiones de marca para cámara.
 
-- **[NUEVO] [produce_guion.py](file:///c:/Users/USUARIO/Desktop/Proyectos/Agente creador de contenido Openclaw/skills/nolan-produce-guion/scripts/produce_guion.py)**:
+- **[NUEVO] [produce_guion.py](skills/nolan-produce-guion/scripts/produce_guion.py)**:
   - Crea un archivo `script.md` usando Sonnet 4.6 para el copy final.
   - Prepara `metadata.json`, `caption.md` y `sources.md` compatibles con el empaquetador.
 - **[MODIFICACIÓN] Validador de Paquetes**: Se modificó `package.py` para permitir paquetes que solo contienen texto (Markdown) sin obligar a que existan imágenes `slide-*.png`, habilitando así el flujo de Guiones.

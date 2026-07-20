@@ -9,7 +9,7 @@ Uso:
 
 Env vars requeridas (en ~/.hermes/.env o entorno):
     HERMES_TELEGRAM_BOT_TOKEN  o  TELEGRAM_BOT_TOKEN
-    TELEGRAM_ALLOWED_USERS   (ID numérico de Mateo, ej: 5638117128)
+    TELEGRAM_ALLOWED_USERS   (ID numérico de Mateo, ej: <TELEGRAM_USER_ID>)
     RCLONE_REMOTE            (opcional, default: "gdrive")
     DRIVE_ROOT               (opcional, default: "Nolan")
 """
@@ -33,11 +33,13 @@ PROJECT_ROOT = Path(os.environ.get(
 ))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from sapiens.ethics_gate import load_gate, EthicsResult   # noqa: E402
+from sapiens.ethics_gate import load_gate, EthicsResult              # noqa: E402
+from sapiens.alignment_gate import load_align_gate, AlignmentResult  # noqa: E402
+from sapiens._paths import pieces_db_path                            # noqa: E402
 
 _REQUIRED_FILES = ["metadata.json", "caption.md", "alt_text.md", "sources.md"]
 _REQUIRED_META  = [
-    "piece_id", "format", "niche", "topic", "sources",
+    "piece_id", "format", "niche", "topic", "pillar", "sources",
     "llm_cost_usd", "ethics_score", "status", "created_at", "archetype",
 ]
 
@@ -82,6 +84,28 @@ def main():
     if ethics.status == "red":
         _notify_block(args.piece_id, ethics, args.dry_run)
         sys.exit(2)
+
+    # ── 2b. Alignment (fit Sapiens: pillar, cuota, arquetipo, vocabulario) ───
+    align_gate = load_align_gate()
+    meta_path  = piece_dir / "metadata.json"
+    if meta_path.exists():
+        meta_for_align = json.loads(meta_path.read_text(encoding="utf-8"))
+        alignment = align_gate.check(meta_for_align, texts)
+        failed = [c for c in alignment.checks if not c.passed]
+        print(f"[package] alignment={alignment.status} "
+              f"failed={[c.id for c in failed]}")
+        if alignment.status == "red":
+            _notify_block_alignment(args.piece_id, alignment, args.dry_run)
+            sys.exit(4)
+        if alignment.status == "yellow":
+            meta_for_align["alignment_warnings"] = [
+                {"id": c.id, "severity": c.severity, "reason": c.reason}
+                for c in failed
+            ]
+            meta_path.write_text(
+                json.dumps(meta_for_align, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
 
     # ── 3. Preview para carrusel ──────────────────────────────────────────────
     slides = sorted(piece_dir.glob("slide-*.png"))
@@ -201,44 +225,99 @@ def _build_preview(cover: Path, preview: Path):
 # SQLite
 # ---------------------------------------------------------------------------
 
+_SCHEMA_PATH = PROJECT_ROOT / "memory" / "schemas" / "pieces.sql"
+
+# Columnas que el schema oficial puede no tener en DBs viejas creadas por
+# versiones anteriores de package.py. Se intentan agregar de forma defensiva.
+_DEFENSIVE_COLUMNS = [
+    ("topic",            "TEXT"),
+    ("hook",             "TEXT"),
+    ("archetype",        "TEXT"),
+    ("pillar",           "TEXT"),
+    ("evergreen_id",     "TEXT"),
+    ("ethics_score",     "TEXT DEFAULT 'green'"),
+    ("rejection_reason", "TEXT"),
+    ("llm_cost_usd",     "REAL DEFAULT 0"),
+    ("sources_json",     "TEXT"),
+    ("produced_at",      "TEXT"),
+]
+
+
+def _ensure_schema(conn: sqlite3.Connection):
+    """Aplica el schema oficial (pieces.sql) + ALTER defensivos para DBs viejas."""
+    if _SCHEMA_PATH.exists():
+        try:
+            conn.executescript(_SCHEMA_PATH.read_text(encoding="utf-8"))
+        except sqlite3.OperationalError as e:
+            print(f"[package] WARN aplicando schema oficial: {e}", file=sys.stderr)
+    for col, decl in _DEFENSIVE_COLUMNS:
+        try:
+            conn.execute(f"ALTER TABLE pieces ADD COLUMN {col} {decl}")
+        except sqlite3.OperationalError:
+            pass  # columna ya existe
+
+
 def _upsert_piece(piece_id: str, piece_dir: Path):
-    db = PROJECT_ROOT / "memory" / "pieces.sqlite"
+    db = pieces_db_path()
     db.parent.mkdir(parents=True, exist_ok=True)
     meta = {}
     mp   = piece_dir / "metadata.json"
     if mp.exists():
         meta = json.loads(mp.read_text(encoding="utf-8"))
     now = datetime.now(tz=timezone.utc).astimezone().isoformat()
+    niche = meta.get("niche", "")
+    if isinstance(niche, list):
+        niche = json.dumps(niche, ensure_ascii=False)
+    sources = meta.get("sources", [])
+    sources_json = json.dumps(sources, ensure_ascii=False) if not isinstance(sources, str) else sources
+    evergreen_id = meta.get("evergreen_id") or None
+
     with sqlite3.connect(db) as conn:
+        _ensure_schema(conn)
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS pieces (
-                piece_id TEXT PRIMARY KEY,
-                format TEXT,
-                niche TEXT,
-                status TEXT,
-                drive_path TEXT,
-                telegram_message_id TEXT,
-                created_at TEXT,
-                updated_at TEXT
+            INSERT INTO pieces (
+                piece_id, format, niche, topic, hook, archetype, pillar, evergreen_id,
+                status, ethics_score, llm_cost_usd, sources_json,
+                drive_path, produced_at, created_at, updated_at
             )
-        """)
-        conn.execute("""
-            INSERT INTO pieces (piece_id, format, niche, status, drive_path, created_at, updated_at)
-            VALUES (?, ?, ?, 'pending_review', '', ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', ?, ?, ?, '', ?, ?, ?)
             ON CONFLICT(piece_id) DO UPDATE SET
-                status     = 'pending_review',
-                updated_at = excluded.updated_at
+                status       = 'pending_review',
+                topic        = COALESCE(excluded.topic, pieces.topic),
+                hook         = COALESCE(excluded.hook, pieces.hook),
+                archetype    = COALESCE(excluded.archetype, pieces.archetype),
+                pillar       = COALESCE(excluded.pillar, pieces.pillar),
+                evergreen_id = COALESCE(excluded.evergreen_id, pieces.evergreen_id),
+                ethics_score = excluded.ethics_score,
+                llm_cost_usd = excluded.llm_cost_usd,
+                sources_json = excluded.sources_json,
+                updated_at   = excluded.updated_at
         """, (
             piece_id,
             meta.get("format", "carrusel"),
-            meta.get("niche", ""),
+            niche,
+            meta.get("topic", ""),
+            meta.get("hook", ""),
+            meta.get("archetype", ""),
+            meta.get("pillar", ""),
+            evergreen_id,
+            meta.get("ethics_score", "green"),
+            float(meta.get("llm_cost_usd", 0) or 0),
+            sources_json,
+            meta.get("created_at", now),
             meta.get("created_at", now),
             now,
         ))
 
+        if evergreen_id:
+            conn.execute(
+                "INSERT INTO evergreen_usage (evergreen_id, piece_id, used_at) VALUES (?, ?, ?)",
+                (evergreen_id, piece_id, now),
+            )
+
 
 def _save_message_id(piece_id: str, msg_id: int):
-    db = PROJECT_ROOT / "memory" / "pieces.sqlite"
+    db = pieces_db_path()
     if not db.exists():
         return
     with sqlite3.connect(db) as conn:
@@ -273,7 +352,13 @@ def _sync_drive(piece_id: str, piece_dir: Path) -> str | None:
     dest     = f"{remote}:{root}/{subfolder}/{piece_id}/"
 
     includes = list(_FORMAT_DRIVE_INCLUDE.get(fmt, []))
-    includes += ["--include", "caption.md", "--include", "sources.md", "--exclude", "*"]
+    includes += [
+        "--include", "caption.md",
+        "--include", "sources.md",
+        "--include", "alt_text.md",
+        "--include", "metadata.json",
+        "--exclude", "*",
+    ]
 
     cmd = [
         "rclone", "copy", str(piece_dir) + "/", dest,
@@ -491,6 +576,25 @@ def _notify_block(piece_id: str, ethics: EthicsResult, dry_run: bool):
         f"texto: {ethics.matched_text[:120]}\n"
         f"/autofix {piece_id} o /rechazar {piece_id}"
     )
+    print(msg, file=sys.stderr)
+    if dry_run:
+        return
+    try:
+        base    = _bot_base()
+        chat_id = _mateo_chat_id()
+        with httpx.Client(timeout=15) as client:
+            client.post(f"{base}/sendMessage", json={"chat_id": chat_id, "text": msg})
+    except Exception:
+        pass
+
+
+def _notify_block_alignment(piece_id: str, alignment: AlignmentResult, dry_run: bool):
+    failed_red = [c for c in alignment.checks if c.severity == "red"]
+    lines = [f"[bloqueo] Alignment rojo en draft {piece_id}"]
+    for c in failed_red:
+        lines.append(f"  · {c.id}: {c.reason}")
+    lines.append(f"/autofix {piece_id} o /rechazar {piece_id}")
+    msg = "\n".join(lines)
     print(msg, file=sys.stderr)
     if dry_run:
         return

@@ -61,9 +61,9 @@ assets/
 
 slides/                              — 7 templates canónicos (copy + edit)
   Cover.html        portada teal con hero word
-  Thesis.html       tesis con kicker + body
-  Comparative.html  dos columnas (modelo viejo vs sapiens)
-  Process.html      4 pasos numerados con paso activo en teal
+  Thesis.html       tesis única (sin kicker) + body opcional ≤80 chars
+  Comparative.html  antes/después minimalista — UNA frase por lado, sin bullets
+  Process.html      pasos numerados con UN solo `.step-text` por paso
   BigQuote.html     cita grande con atribución (cremoso)
   Stat.html         dato grande (380px) sobre teal-deep + fuente
   CTA.html          near-black con botón gold + tagline
@@ -85,6 +85,8 @@ El skill no se ejecuta solo. `produce_carrusel_ds.py` lo orquesta en este flujo:
 
 ## Reglas duras del sistema visual (no se relajan jamás)
 
+- [ ] **Una idea por slide.** Cada slide expresa UN concepto central, en el texto principal. Excepciones únicas: **Comparative** (dos polos del mismo contraste) y **Process** (UNA secuencia donde cada paso = UNA frase única).
+- [ ] **Body máx 80 chars (sin `<br>`).** El campo `.body` es opcional, complementa sin repetir. Si dudas, omítelo. Si necesitas más, parte el contenido en otro slide.
 - [ ] Wordmark **siempre lowercase** `sapiens` — nunca `Sapiens` o `SAPIENS`.
 - [ ] Color primario **Sapiens Teal `#2B9E8F`** — nunca coral, nunca amber (esos son del parent brand Shift).
 - [ ] Light mode siempre. Dark mode (CTA `#1A1C23`, Stat `#1E7A6D`) solo cuando el template lo define.
@@ -101,9 +103,9 @@ El skill no se ejecuta solo. `produce_carrusel_ds.py` lo orquesta en este flujo:
 | Tipo | Background | Uso típico | Reglas de copy |
 |---|---|---|---|
 | **Cover** | teal `#2B9E8F` | Slide 01 — hero con palabra-concepto | Hero ≤ 4 palabras, eyebrow `sapiens · ed`, una palabra en gold opcional |
-| **Thesis** | warm white `#FAFAF7` | Slide 02 — la pregunta o tesis | Tag `La tesis · 02 / NN`, kicker corto, thesis ≤ 14 palabras, body ≤ 30 palabras |
-| **Comparative** | warm white | Slide 03 — modelo viejo vs sapiens | Dos columnas paralelas, 3 bullets cada una, máx 12 palabras por bullet |
-| **Process** | warm white | Slide 04 — 3 a 5 pasos del método | 1 step "active" en teal (el clave), resto en blanco. Title de paso ≤ 4 palabras, descripción ≤ 16 palabras |
+| **Thesis** | warm white `#FAFAF7` | Slide 02 — la pregunta o tesis (UNA sola idea) | Tag `La tesis · 02 / NN`, **`.thesis` ≤ 14 palabras**, `.body` opcional ≤ 80 chars. **NO uses `.kicker`** (eliminado). |
+| **Comparative** | warm white | Slide 03 — antes/después minimalista | **UNA `.frase` por lado** (`.side.old` y `.side.new`), máx 8 palabras cada una, sin bullets. `.body` opcional ≤ 80 chars con matiz secundario. **NO uses `.li`/`.col.old/.new/.big`** (eliminados). |
+| **Process** | warm white | Slide 04 — 3 a 5 pasos del método | 1 step "active" en teal (el clave). Cada `.step` tiene **UN solo `<div class="step-text">…</div>`** (frase única ≤ 12 palabras). **NO uses `.h` ni `.p` dentro de `.step`** (eliminados). |
 | **BigQuote** | cream `#F5F0EB` | Slide 05 — cita corta de un caso | Tag tipo `Caso real · 05 / NN`, quote ≤ 16 palabras, atribución con nombre + contexto. **Solo si hay caso real verificable.** Si no hay → omitir este slide. |
 | **Stat** | teal-deep `#1E7A6D` | Slide 06 — un dato fuerte con fuente | Número grande (≤ 4 chars con sufijo), kicker explicando el dato, fuente verificable obligatoria |
 | **CTA** | near-black `#1A1C23` | Slide 07 (último) — invitación a actuar | Headline ≤ 8 palabras, botón gold con flecha, handle `@sapiens.ed`, logo grande abajo |

@@ -1,6 +1,8 @@
 # Nolan — Roadmap de amplificación
 
-> **Estado actual (2026-05-01):** pipeline carrusel + **carrusel-ds** + animación + guion operativo en VPS bajo systemd. Funnel v2 (padres PRIMARIO). Learning loop semanal y skill-review diario corriendo. LLM router con NIM (DeepSeek gratuito) + fallback automático. Costo actual ~$7/mes. Cap presupuestal: $50/mes LLM + $10/mes Apify.
+> **Estado actual (2026-05-18):** pipeline carrusel + **carrusel-ds** + animación Manim + talking-head (reels-postpro) + research + callbacks + learning loop operativo en VPS bajo systemd. rclone Drive configurado y operativo. Funnel v2 (padres PRIMARIO). Costo actual ~$7/mes. Cap presupuestal: $50/mes LLM + $10/mes Apify.
+>
+> **Hito confirmado:** @sapiens.ed comienza a publicar el **2026-05-19**. Tier 1 (feedback loop) arranca la **semana del 19 mayo** — primera prioridad.
 >
 > **Skill carrusel-ds:** alternativa visual al carrusel de gestos. 7 templates HTML magazine-layout (Cover/Thesis/Comparative/Process/BigQuote/Stat/CTA). Jueves automático vía ciclo.sh. Prueba real completada 2026-05-01: 6 slides, ethics green, $0.18/pieza.
 >

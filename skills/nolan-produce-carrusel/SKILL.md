@@ -38,6 +38,8 @@ python3.12 /srv/sapiens-nolan/skills/nolan-produce-carrusel/scripts/produce_carr
    - Sistema: `prompts/system/copywriter.md` + `prompts/formats/carrusel.md`
    - Usuario: brief + shortlist de fuentes
    - Output: YAML con estructura de `sapiens-carrusel/SKILL.md` §6 (comillas simples ASCII estrictas)
+   - Regla "una idea por slide" obligatoria: cada slide interior expresa una sola idea en el texto del gesto. `body`/`subline` opcionales, máx 80 chars, complementan sin repetir.
+   - Solo 3 gestos vigentes: `tachadura`, `escala`, `repeticion`.
 3. **Validar YAML** con `pyyaml.safe_load` antes de persistir. Si falla, reintentar una vez con error de parsing como contexto.
 4. **Chequeo ethics** (pre-render): regex sobre texto de slides + caption candidata. Si rojo → halt + notify; si amarillo → reformular una vez.
 5. **Persistir** `staging/<piece_id>/content.yaml`.
@@ -67,7 +69,7 @@ python3.12 /srv/sapiens-nolan/skills/nolan-produce-carrusel/scripts/produce_carr
 
 - **YAML con comillas curvas**: Claude Sonnet ocasionalmente genera `"` en vez de `'`. Validator debe rechazar y reintentar con prompt corrector.
 - **Render Playwright falla por fuentes**: si `fc-list | grep Outfit` devuelve vacío, abort + log ERROR + notify (no intentar render con fallback — rompe identidad).
-- **Slides con texto > 240 char**: violación de regla duras. Trunar + reintento o pedir LLM que reescriba.
+- **Slides con `body` o `subline` > 80 char**: violación de regla "una idea por slide". El validador rechaza y reintenta. Si el LLM insiste, partir el contenido en 2 slides.
 - **Rotación cromática no actualizada**: revisar que `history.json` esté versionado en el deploy y que el contenedor tenga permisos de write.
 
 ## Verification
